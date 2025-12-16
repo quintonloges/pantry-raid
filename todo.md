@@ -46,11 +46,11 @@
 
 ## 2) CI: Run Tests on PR + Main/Release
 
-- [ ] Add GitHub Actions workflow:
-  - [ ] Trigger: `pull_request`, push to `main`, push to `release`
-  - [ ] Install .NET SDK (latest LTS)
-  - [ ] Restore/build
-  - [ ] Run all tests
+- [x] Add GitHub Actions workflow:
+  - [x] Trigger: `pull_request`, push to `main`, push to `release`
+  - [x] Install .NET SDK (latest LTS)
+  - [x] Restore/build
+  - [x] Run all tests
 - [ ] Ensure CI is green for initial baseline
 
 ---
