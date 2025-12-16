@@ -1,10 +1,28 @@
 using Loges.PantryRaid.EFCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using NSwag;
+using NSwag.Generation.Processors.Security;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApiDocument();
+
+// Configure NSwag with JWT support
+builder.Services.AddOpenApiDocument(config => {
+  config.Title = "PantryRaid API";
+  config.AddSecurity("Bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme {
+    Type = OpenApiSecuritySchemeType.Http,
+    Scheme = "Bearer",
+    BearerFormat = "JWT", 
+    Description = "Enter your valid JWT token."
+  });
+
+  config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("Bearer"));
+});
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
 if (string.IsNullOrEmpty(connectionString)) {
@@ -27,6 +45,29 @@ builder.Services.AddDbContext<AppDbContext>(options => {
   }
 });
 
+// Identity
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+  .AddEntityFrameworkStores<AppDbContext>()
+  .AddDefaultTokenProviders();
+
+// Authentication & JWT
+builder.Services.AddAuthentication(options => {
+  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options => {
+  options.SaveToken = true;
+  options.RequireHttpsMetadata = false;
+  options.TokenValidationParameters = new TokenValidationParameters() {
+    ValidateIssuer = true,
+    ValidateAudience = true,
+    ValidAudience = builder.Configuration["Jwt:Audience"],
+    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+  };
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment()) {
@@ -37,6 +78,9 @@ if (app.Environment.IsDevelopment()) {
   // Available at: http://localhost:<port>/swagger
   app.UseSwaggerUi(); // UseSwaggerUI Protected by if (env.IsDevelopment())
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

@@ -51,66 +51,66 @@
   - [x] Install .NET SDK (latest LTS)
   - [x] Restore/build
   - [x] Run all tests
-- [ ] Ensure CI is green for initial baseline
+- [x] Ensure CI is green for initial baseline
 
 ---
 
 ## 3) EF Core + MySQL + Migrations Baseline
 
-- [ ] Add packages:
-  - [ ] `Microsoft.EntityFrameworkCore`
-  - [ ] `Microsoft.EntityFrameworkCore.Design`
-  - [ ] `Pomelo.EntityFrameworkCore.MySql`
-- [ ] Add `AppDbContext` wired into DI
-- [ ] Add configuration:
-  - [ ] `ConnectionStrings:Default` in appsettings
-  - [ ] Env var override `ConnectionStrings__Default`
-- [ ] Add endpoint `GET /api/db/ping` that verifies DB connectivity
-- [ ] Add baseline migration (even if only contains Identity later; start minimal)
+- [x] Add packages:
+  - [x] `Microsoft.EntityFrameworkCore`
+  - [x] `Microsoft.EntityFrameworkCore.Design`
+  - [x] `Pomelo.EntityFrameworkCore.MySql`
+- [x] Add `AppDbContext` wired into DI
+- [x] Add configuration:
+  - [x] `ConnectionStrings:Default` in appsettings
+  - [x] Env var override `ConnectionStrings__Default`
+- [x] Add endpoint `GET /api/db/ping` that verifies DB connectivity
+- [x] Add baseline migration (even if only contains Identity later; start minimal)
 
 ### Integration Testing Infrastructure
-- [ ] Add Testcontainers for integration tests
-- [ ] Spin up MySQL-compatible container per test collection/fixture
-- [ ] Configure API to use container connection string
-- [ ] Apply migrations in test boot
-- [ ] Integration test: `GET /api/db/ping` returns 200
+- [x] Add Testcontainers for integration tests
+- [x] Spin up MySQL-compatible container per test collection/fixture
+- [x] Configure API to use container connection string
+- [x] Apply migrations in test boot
+- [x] Integration test: `GET /api/db/ping` returns 200
 
 ---
 
 ## 4) Audit Columns + Soft Delete (Global)
 
-- [ ] Add audit fields to all domain entities:
-  - [ ] `created_at`, `created_by`
-  - [ ] `updated_at`, `updated_by`
-  - [ ] `is_deleted`, `deleted_at`, `deleted_by`
-- [ ] Add base entity type (e.g., `AuditedEntity`)
-- [ ] Add global query filter excluding `is_deleted = true`
-- [ ] Add SaveChanges pipeline (interceptor/service) to set timestamps automatically:
-  - [ ] on create: set created_at + updated_at
-  - [ ] on update: set updated_at
-- [ ] Implement soft delete helper (sets flags instead of removing)
-- [ ] Add a small “proof” entity (e.g., `SystemNote`) and expose minimal internal usage
+- [x] Add audit fields to all domain entities:
+  - [x] `created_at`, `created_by`
+  - [x] `updated_at`, `updated_by`
+  - [x] `is_deleted`, `deleted_at`, `deleted_by`
+- [x] Add base entity type (e.g., `AuditedEntity`)
+- [x] Add global query filter excluding `is_deleted = true`
+- [x] Add SaveChanges pipeline (interceptor/service) to set timestamps automatically:
+  - [x] on create: set created_at + updated_at
+  - [x] on update: set updated_at
+- [x] Implement soft delete helper (sets flags instead of removing)
+- [x] Add a small “proof” entity (e.g., `SystemNote`) and expose minimal internal usage
 
 ### Tests
-- [ ] Unit test: SaveChanges sets timestamps correctly
-- [ ] Integration test: soft deleted rows are excluded by default query filter
+- [x] Unit test: SaveChanges sets timestamps correctly
+- [x] Integration test: soft deleted rows are excluded by default query filter
 
 ---
 
 ## 5) Authentication & Authorization (Identity + JWT)
 
 ### Identity + JWT
-- [ ] Add ASP.NET Core Identity to API
-- [ ] Use EF stores backed by MySQL
-- [ ] Configure JWT auth:
-  - [ ] issuer, audience, signing key
-  - [ ] token expiration
-- [ ] Wire Swagger security scheme for bearer tokens
+- [x] Add ASP.NET Core Identity to API
+- [x] Use EF stores backed by MySQL
+- [x] Configure JWT auth:
+  - [x] issuer, audience, signing key
+  - [x] token expiration
+- [x] Wire Swagger security scheme for bearer tokens
 
 ### Public Auth Endpoints (MVP)
-- [ ] `POST /api/auth/register` (email, password)
-- [ ] `POST /api/auth/login` (email, password) → token + expiry
-- [ ] `GET /api/auth/me` (auth required) → email
+- [x] `POST /api/auth/register` (email, password)
+- [x] `POST /api/auth/login` (email, password) → token + expiry
+- [x] `GET /api/auth/me` (auth required) → email
 
 ### Account Management (MVP)
 - [ ] `POST /api/auth/change-password` (auth required)
