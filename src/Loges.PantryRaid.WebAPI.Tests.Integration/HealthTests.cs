@@ -1,15 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace Loges.PantryRaid.WebAPI.Tests.Integration;
 
-public class HealthTests : IClassFixture<WebApplicationFactory<Program>> {
-  private readonly WebApplicationFactory<Program> _factory;
+public class HealthTests : IClassFixture<PantryRaidWebApplicationFactory> {
+  private readonly PantryRaidWebApplicationFactory _factory;
 
-  public HealthTests(WebApplicationFactory<Program> factory)
-  {
+  public HealthTests(PantryRaidWebApplicationFactory factory) {
     _factory = factory;
   }
 
@@ -34,4 +32,3 @@ public class HealthTests : IClassFixture<WebApplicationFactory<Program>> {
     public string Status { get; set; } = string.Empty;
   }
 }
-
