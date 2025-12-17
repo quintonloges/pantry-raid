@@ -71,7 +71,7 @@ public class AuthController : ControllerBase {
   [HttpGet("me")]
   public async Task<IActionResult> Me() {
     // Check if user still exists/is not deleted
-    var user = await _userManager.FindByNameAsync(User.Identity!.Name!);
+    AppUser? user = await _userManager.FindByNameAsync(User.Identity!.Name!);
     if (user == null) {
         return Unauthorized();
     }
@@ -81,12 +81,12 @@ public class AuthController : ControllerBase {
   [Authorize]
   [HttpPost("change-password")]
   public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest model) {
-    var user = await _userManager.FindByNameAsync(User.Identity!.Name!);
+    AppUser? user = await _userManager.FindByNameAsync(User.Identity!.Name!);
     if (user == null) {
       return Unauthorized();
     }
 
-    var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+    IdentityResult result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
     if (!result.Succeeded) {
       return BadRequest(new { Message = "Password change failed", Errors = result.Errors });
     }
@@ -96,14 +96,14 @@ public class AuthController : ControllerBase {
   [Authorize]
   [HttpDelete("account")]
   public async Task<IActionResult> DeleteAccount() {
-    var user = await _userManager.FindByNameAsync(User.Identity!.Name!);
+    AppUser? user = await _userManager.FindByNameAsync(User.Identity!.Name!);
     if (user == null) {
       return Unauthorized();
     }
 
     // UserManager.DeleteAsync calls the store's delete, which calls DbSet.Remove.
     // AppDbContext intercepts Deleted state and converts to Soft Delete (Modified + IsDeleted=true).
-    var result = await _userManager.DeleteAsync(user);
+    IdentityResult result = await _userManager.DeleteAsync(user);
     if (!result.Succeeded) {
         return BadRequest(new { Message = "Account deletion failed", Errors = result.Errors });
     }
