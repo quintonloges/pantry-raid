@@ -21,7 +21,7 @@ public class AuthController : ControllerBase {
 
   [HttpPost("register")]
   public async Task<IActionResult> Register([FromBody] RegisterRequest model) {
-    var userExists = await _userManager.FindByNameAsync(model.Email);
+    IdentityUser? userExists = await _userManager.FindByNameAsync(model.Email);
     if (userExists != null) {
       return BadRequest(new { Message = "User already exists!" });
     }
@@ -31,7 +31,7 @@ public class AuthController : ControllerBase {
       SecurityStamp = Guid.NewGuid().ToString(),
       UserName = model.Email
     };
-    var result = await _userManager.CreateAsync(user, model.Password);
+    IdentityResult result = await _userManager.CreateAsync(user, model.Password);
     if (!result.Succeeded) {
       return BadRequest(new { Message = "User creation failed", Errors = result.Errors });
     }
@@ -41,20 +41,20 @@ public class AuthController : ControllerBase {
 
   [HttpPost("login")]
   public async Task<IActionResult> Login([FromBody] LoginRequest model) {
-    var user = await _userManager.FindByNameAsync(model.Email);
+    IdentityUser? user = await _userManager.FindByNameAsync(model.Email);
     if (user != null && await _userManager.CheckPasswordAsync(user, model.Password)) {
-      var userRoles = await _userManager.GetRolesAsync(user);
+      IList<string> userRoles = await _userManager.GetRolesAsync(user);
 
-      var authClaims = new List<Claim> {
+      List<Claim> authClaims = new List<Claim> {
         new Claim(ClaimTypes.Name, user.UserName!),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
       };
 
-      foreach (var userRole in userRoles) {
+      foreach (string userRole in userRoles) {
         authClaims.Add(new Claim(ClaimTypes.Role, userRole));
       }
 
-      var token = GetToken(authClaims);
+      JwtSecurityToken token = GetToken(authClaims);
 
       return Ok(new {
         token = new JwtSecurityTokenHandler().WriteToken(token),
@@ -71,12 +71,12 @@ public class AuthController : ControllerBase {
   }
 
   private JwtSecurityToken GetToken(List<Claim> authClaims) {
-    var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+    SymmetricSecurityKey authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
 
-    var token = new JwtSecurityToken(
+    JwtSecurityToken token = new JwtSecurityToken(
       issuer: _configuration["Jwt:Issuer"],
       audience: _configuration["Jwt:Audience"],
-      expires: DateTime.Now.AddHours(3),
+      expires: DateTime.UtcNow.AddHours(3),
       claims: authClaims,
       signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
     );

@@ -1,8 +1,10 @@
 using Loges.PantryRaid.EFCore;
 using Loges.PantryRaid.Models;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Loges.PantryRaid.WebAPI.Tests.Integration;
 
@@ -16,13 +18,19 @@ public class AuditTests : IClassFixture<PantryRaidWebApplicationFactory> {
   [Fact]
   public async Task SaveChanges_SetsAuditProperties_And_SoftDeletes() {
     // Arrange
-    using var scope = _factory.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    WebApplicationFactory<Program> factory = _factory.WithWebHostBuilder(builder => {
+      builder.ConfigureTestServices(services => {
+        services.AddScoped<ICurrentUserService, MockCurrentUserService>();
+      });
+    });
+
+    using IServiceScope scope = factory.Services.CreateScope();
+    AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     
     // Ensure DB is ready (relying on factory init, but clean state helps)
     await context.Database.EnsureCreatedAsync();
 
-    var note = new SystemNote { Content = "Test Note" };
+    SystemNote note = new SystemNote { Content = "Test Note" };
 
     // Act - Create
     context.SystemNotes.Add(note);
@@ -30,9 +38,10 @@ public class AuditTests : IClassFixture<PantryRaidWebApplicationFactory> {
 
     // Assert - Create
     Assert.NotEqual(default, note.CreatedAt);
+    Assert.Equal("TestUser", note.CreatedBy);
     Assert.False(note.IsDeleted);
     Assert.Null(note.DeletedAt);
-    var createdId = note.Id;
+    int createdId = note.Id;
 
     // Act - Update
     // Need to fetch fresh or keep context tracking. 
@@ -46,6 +55,7 @@ public class AuditTests : IClassFixture<PantryRaidWebApplicationFactory> {
     // Assert - Update
     Assert.NotNull(note.UpdatedAt);
     Assert.True(note.UpdatedAt >= note.CreatedAt);
+    Assert.Equal("TestUser", note.UpdatedBy);
     
     // Act - Soft Delete
     context.SystemNotes.Remove(note);
@@ -54,18 +64,23 @@ public class AuditTests : IClassFixture<PantryRaidWebApplicationFactory> {
     // Assert - Soft Delete
     Assert.True(note.IsDeleted);
     Assert.NotNull(note.DeletedAt);
+    Assert.Equal("TestUser", note.DeletedBy);
     
     // Verify Query Filter
     // Create a new context to ensure we are hitting the DB and filter logic
-    using var scope2 = _factory.Services.CreateScope();
-    var context2 = scope2.ServiceProvider.GetRequiredService<AppDbContext>();
+    using IServiceScope scope2 = factory.Services.CreateScope();
+    AppDbContext context2 = scope2.ServiceProvider.GetRequiredService<AppDbContext>();
     
-    var deletedNote = await context2.SystemNotes.FirstOrDefaultAsync(n => n.Id == createdId);
+    SystemNote? deletedNote = await context2.SystemNotes.FirstOrDefaultAsync(n => n.Id == createdId);
     Assert.Null(deletedNote); // Should not find it
 
-    var ignoreFilterNote = await context2.SystemNotes.IgnoreQueryFilters().FirstOrDefaultAsync(n => n.Id == createdId);
+    SystemNote? ignoreFilterNote = await context2.SystemNotes.IgnoreQueryFilters().FirstOrDefaultAsync(n => n.Id == createdId);
     Assert.NotNull(ignoreFilterNote);
     Assert.True(ignoreFilterNote.IsDeleted);
+  }
+
+  private class MockCurrentUserService : ICurrentUserService {
+    public string? UserId => "TestUser";
   }
 }
 

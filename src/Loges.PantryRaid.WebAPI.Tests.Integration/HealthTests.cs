@@ -14,16 +14,16 @@ public class HealthTests : IClassFixture<PantryRaidWebApplicationFactory> {
   [Fact]
   public async Task Get_Health_Returns200AndCorrectJson() {
     // Arrange
-    var client = _factory.CreateClient();
+    HttpClient client = _factory.CreateClient();
 
     // Act
-    var response = await client.GetAsync("/api/health");
+    HttpResponseMessage response = await client.GetAsync("/api/health");
 
     // Assert
     response.EnsureSuccessStatusCode(); // Status Code 200-299
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     
-    var content = await response.Content.ReadFromJsonAsync<HealthResponse>(new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+    HealthResponse? content = await response.Content.ReadFromJsonAsync<HealthResponse>(new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     Assert.NotNull(content);
     Assert.Equal("ok", content.Status);
   }

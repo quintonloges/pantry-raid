@@ -7,9 +7,11 @@ using NSwag;
 using NSwag.Generation.Processors.Security;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<Loges.PantryRaid.EFCore.ICurrentUserService, Loges.PantryRaid.WebAPI.Services.CurrentUserService>();
 
 // Configure NSwag with JWT support
 builder.Services.AddOpenApiDocument(config => {
@@ -24,7 +26,7 @@ builder.Services.AddOpenApiDocument(config => {
   config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("Bearer"));
 });
 
-var connectionString = builder.Configuration.GetConnectionString("Default");
+string? connectionString = builder.Configuration.GetConnectionString("Default");
 if (string.IsNullOrEmpty(connectionString)) {
   throw new InvalidOperationException("Connection string 'Default' not found.");
 }
@@ -68,7 +70,7 @@ builder.Services.AddAuthentication(options => {
   };
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment()) {
   // Add OpenAPI 3.0 document serving middleware
