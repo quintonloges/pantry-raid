@@ -2,6 +2,7 @@ using Loges.PantryRaid.EFCore;
 using Loges.PantryRaid.Models;
 using Loges.PantryRaid.Services.Interfaces;
 using Loges.PantryRaid.Services;
+using Loges.PantryRaid.WebAPI.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -55,6 +56,8 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
   .AddEntityFrameworkStores<AppDbContext>()
   .AddDefaultTokenProviders();
 
+builder.Services.AddTransient<IDbSeeder, DbSeeder>();
+
 // Authentication & JWT
 builder.Services.AddAuthentication(options => {
   options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -74,6 +77,21 @@ builder.Services.AddAuthentication(options => {
 });
 
 WebApplication app = builder.Build();
+
+// Seed Data
+using (IServiceScope scope = app.Services.CreateScope()) {
+  IServiceProvider services = scope.ServiceProvider;
+  try {
+    AppDbContext context = services.GetRequiredService<AppDbContext>();
+    await context.Database.MigrateAsync();
+
+    IDbSeeder seeder = services.GetRequiredService<IDbSeeder>();
+    await seeder.SeedAsync();
+  } catch (Exception ex) {
+    ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "An error occurred while seeding the database.");
+  }
+}
 
 if (app.Environment.IsDevelopment()) {
   // Add OpenAPI 3.0 document serving middleware
