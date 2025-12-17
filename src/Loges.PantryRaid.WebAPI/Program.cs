@@ -1,4 +1,7 @@
 using Loges.PantryRaid.EFCore;
+using Loges.PantryRaid.Models;
+using Loges.PantryRaid.Services.Interfaces;
+using Loges.PantryRaid.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +14,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<Loges.PantryRaid.EFCore.ICurrentUserService, Loges.PantryRaid.WebAPI.Services.CurrentUserService>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Configure NSwag with JWT support
 builder.Services.AddOpenApiDocument(config => {
@@ -48,7 +51,7 @@ builder.Services.AddDbContext<AppDbContext>(options => {
 });
 
 // Identity
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<AppUser, IdentityRole>()
   .AddEntityFrameworkStores<AppDbContext>()
   .AddDefaultTokenProviders();
 

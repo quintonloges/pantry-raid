@@ -1,5 +1,6 @@
 using Loges.PantryRaid.EFCore;
 using Loges.PantryRaid.Models;
+using Loges.PantryRaid.Services.Interfaces;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

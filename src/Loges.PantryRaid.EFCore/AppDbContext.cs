@@ -1,14 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using Loges.PantryRaid.Models;
+using Loges.PantryRaid.Models.Interfaces;
+using Loges.PantryRaid.Services.Interfaces;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Reflection;
 
 namespace Loges.PantryRaid.EFCore;
 
-public class AppDbContext : IdentityDbContext<IdentityUser> {
+public class AppDbContext : IdentityDbContext<AppUser> {
   private readonly ICurrentUserService? _currentUserService;
 
   public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserService? currentUserService = null) : base(options) {
@@ -21,7 +22,7 @@ public class AppDbContext : IdentityDbContext<IdentityUser> {
     base.OnModelCreating(modelBuilder);
 
     foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes()) {
-      if (typeof(AuditedEntity).IsAssignableFrom(entityType.ClrType)) {
+      if (typeof(IAuditedEntity).IsAssignableFrom(entityType.ClrType)) {
         MethodInfo method = SetGlobalQueryFilterMethod.MakeGenericMethod(entityType.ClrType);
         method.Invoke(this, new object[] { modelBuilder });
       }
@@ -32,7 +33,7 @@ public class AppDbContext : IdentityDbContext<IdentityUser> {
     .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
     .Single(t => t.IsGenericMethod && t.Name == nameof(SetGlobalQueryFilter));
 
-  private void SetGlobalQueryFilter<T>(ModelBuilder builder) where T : AuditedEntity {
+  private void SetGlobalQueryFilter<T>(ModelBuilder builder) where T : class, IAuditedEntity {
     builder.Entity<T>().HasQueryFilter(e => !e.IsDeleted);
   }
 
@@ -47,11 +48,11 @@ public class AppDbContext : IdentityDbContext<IdentityUser> {
   }
 
   private void ApplyAuditInformation() {
-    IEnumerable<EntityEntry<AuditedEntity>> entries = ChangeTracker.Entries<AuditedEntity>();
+    IEnumerable<EntityEntry<IAuditedEntity>> entries = ChangeTracker.Entries<IAuditedEntity>();
     DateTime utcNow = DateTime.UtcNow;
     string? user = _currentUserService?.UserId;
 
-    foreach (EntityEntry<AuditedEntity> entry in entries) {
+    foreach (EntityEntry<IAuditedEntity> entry in entries) {
       if (entry.State == EntityState.Added) {
         entry.Entity.CreatedAt = utcNow;
         entry.Entity.CreatedBy = user;
@@ -69,7 +70,7 @@ public class AppDbContext : IdentityDbContext<IdentityUser> {
         entry.Entity.IsDeleted = true;
         entry.Entity.DeletedAt = utcNow;
         entry.Entity.DeletedBy = user;
-        entry.Entity.UpdatedAt = utcNow; // Also update updated_at? Usually yes or no. Let's do yes.
+        entry.Entity.UpdatedAt = utcNow; 
         entry.Entity.UpdatedBy = user;
       }
     }

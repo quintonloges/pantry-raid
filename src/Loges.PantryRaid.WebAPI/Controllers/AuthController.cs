@@ -5,28 +5,29 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Loges.PantryRaid.Models;
 
 namespace Loges.PantryRaid.WebAPI.Controllers.Auth;
 
 [Route("api/auth")]
 [ApiController]
 public class AuthController : ControllerBase {
-  private readonly UserManager<IdentityUser> _userManager;
+  private readonly UserManager<AppUser> _userManager;
   private readonly IConfiguration _configuration;
 
-  public AuthController(UserManager<IdentityUser> userManager, IConfiguration configuration) {
+  public AuthController(UserManager<AppUser> userManager, IConfiguration configuration) {
     _userManager = userManager;
     _configuration = configuration;
   }
 
   [HttpPost("register")]
   public async Task<IActionResult> Register([FromBody] RegisterRequest model) {
-    IdentityUser? userExists = await _userManager.FindByNameAsync(model.Email);
+    AppUser? userExists = await _userManager.FindByNameAsync(model.Email);
     if (userExists != null) {
       return BadRequest(new { Message = "User already exists!" });
     }
 
-    IdentityUser user = new() {
+    AppUser user = new() {
       Email = model.Email,
       SecurityStamp = Guid.NewGuid().ToString(),
       UserName = model.Email
@@ -41,7 +42,9 @@ public class AuthController : ControllerBase {
 
   [HttpPost("login")]
   public async Task<IActionResult> Login([FromBody] LoginRequest model) {
-    IdentityUser? user = await _userManager.FindByNameAsync(model.Email);
+    AppUser? user = await _userManager.FindByNameAsync(model.Email);
+    // Note: FindByNameAsync respects the global query filter for IsDeleted via AppDbContext
+    
     if (user != null && await _userManager.CheckPasswordAsync(user, model.Password)) {
       IList<string> userRoles = await _userManager.GetRolesAsync(user);
 
@@ -66,8 +69,46 @@ public class AuthController : ControllerBase {
 
   [Authorize]
   [HttpGet("me")]
-  public IActionResult Me() {
-    return Ok(new { Email = User.Identity?.Name });
+  public async Task<IActionResult> Me() {
+    // Check if user still exists/is not deleted
+    var user = await _userManager.FindByNameAsync(User.Identity!.Name!);
+    if (user == null) {
+        return Unauthorized();
+    }
+    return Ok(new { Email = user.Email });
+  }
+
+  [Authorize]
+  [HttpPost("change-password")]
+  public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest model) {
+    var user = await _userManager.FindByNameAsync(User.Identity!.Name!);
+    if (user == null) {
+      return Unauthorized();
+    }
+
+    var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+    if (!result.Succeeded) {
+      return BadRequest(new { Message = "Password change failed", Errors = result.Errors });
+    }
+    return Ok(new { Message = "Password changed successfully" });
+  }
+
+  [Authorize]
+  [HttpDelete("account")]
+  public async Task<IActionResult> DeleteAccount() {
+    var user = await _userManager.FindByNameAsync(User.Identity!.Name!);
+    if (user == null) {
+      return Unauthorized();
+    }
+
+    // UserManager.DeleteAsync calls the store's delete, which calls DbSet.Remove.
+    // AppDbContext intercepts Deleted state and converts to Soft Delete (Modified + IsDeleted=true).
+    var result = await _userManager.DeleteAsync(user);
+    if (!result.Succeeded) {
+        return BadRequest(new { Message = "Account deletion failed", Errors = result.Errors });
+    }
+    
+    return Ok(new { Message = "Account deleted successfully" });
   }
 
   private JwtSecurityToken GetToken(List<Claim> authClaims) {
@@ -95,3 +136,7 @@ public class LoginRequest {
   public required string Password { get; set; }
 }
 
+public class ChangePasswordRequest {
+  public required string CurrentPassword { get; set; }
+  public required string NewPassword { get; set; }
+}

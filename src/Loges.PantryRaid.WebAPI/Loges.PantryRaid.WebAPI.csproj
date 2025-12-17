@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Loges.PantryRaid.EFCore\Loges.PantryRaid.EFCore.csproj" />
+    <ProjectReference Include="..\Loges.PantryRaid.Services\Loges.PantryRaid.Services.csproj" />
   </ItemGroup>
 
 </Project>

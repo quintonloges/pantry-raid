@@ -71,6 +71,96 @@ public class AuthTests : IClassFixture<PantryRaidWebApplicationFactory> {
 
     Assert.Equal(HttpStatusCode.Unauthorized, loginResponse.StatusCode);
   }
+
+  [Fact]
+  public async Task ChangePassword_Success() {
+    HttpClient client = _factory.CreateClient();
+    string email = $"user_{Guid.NewGuid()}@example.com";
+    string oldPassword = "Password123!";
+    string newPassword = "NewPassword123!";
+
+    // 1. Register
+    await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest {
+      Email = email,
+      Password = oldPassword
+    });
+
+    // 2. Login
+    HttpResponseMessage loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest {
+      Email = email,
+      Password = oldPassword
+    });
+    LoginResult? loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResult>();
+    string token = loginResult!.Token!;
+
+    // 3. Change Password
+    HttpRequestMessage changePwRequest = new HttpRequestMessage(HttpMethod.Post, "/api/auth/change-password");
+    changePwRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    changePwRequest.Content = JsonContent.Create(new ChangePasswordRequest {
+      CurrentPassword = oldPassword,
+      NewPassword = newPassword
+    });
+
+    HttpResponseMessage changePwResponse = await client.SendAsync(changePwRequest);
+    Assert.Equal(HttpStatusCode.OK, changePwResponse.StatusCode);
+
+    // 4. Login with Old Password (should fail)
+    HttpResponseMessage oldLoginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest {
+      Email = email,
+      Password = oldPassword
+    });
+    Assert.Equal(HttpStatusCode.Unauthorized, oldLoginResponse.StatusCode);
+
+    // 5. Login with New Password (should succeed)
+    HttpResponseMessage newLoginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest {
+      Email = email,
+      Password = newPassword
+    });
+    Assert.Equal(HttpStatusCode.OK, newLoginResponse.StatusCode);
+  }
+
+  [Fact]
+  public async Task DeleteAccount_SoftDelete_PreventsLogin() {
+    HttpClient client = _factory.CreateClient();
+    string email = $"user_{Guid.NewGuid()}@example.com";
+    string password = "Password123!";
+
+    // 1. Register
+    await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest {
+      Email = email,
+      Password = password
+    });
+
+    // 2. Login
+    HttpResponseMessage loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest {
+      Email = email,
+      Password = password
+    });
+    LoginResult? loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResult>();
+    string token = loginResult!.Token!;
+
+    // 3. Delete Account
+    HttpRequestMessage deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/auth/account");
+    deleteRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    
+    HttpResponseMessage deleteResponse = await client.SendAsync(deleteRequest);
+    Assert.Equal(HttpStatusCode.OK, deleteResponse.StatusCode);
+
+    // 4. Try Login again (should fail)
+    HttpResponseMessage reloginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest {
+      Email = email,
+      Password = password
+    });
+    Assert.Equal(HttpStatusCode.Unauthorized, reloginResponse.StatusCode);
+
+    // 5. Try /me with old token (should fail because user is not found)
+    // Note: The token itself is valid signature-wise, but the /me endpoint checks if user exists in DB.
+    HttpRequestMessage meRequest = new HttpRequestMessage(HttpMethod.Get, "/api/auth/me");
+    meRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    
+    HttpResponseMessage meResponse = await client.SendAsync(meRequest);
+    Assert.Equal(HttpStatusCode.Unauthorized, meResponse.StatusCode);
+  }
 }
 
 public class LoginResult {
@@ -81,4 +171,3 @@ public class LoginResult {
 public class MeResult {
   public string? Email { get; set; }
 }
-

@@ -1,7 +1,7 @@
-using Loges.PantryRaid.EFCore;
-using System.Security.Claims;
+using Loges.PantryRaid.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 
-namespace Loges.PantryRaid.WebAPI.Services;
+namespace Loges.PantryRaid.Services;
 
 public class CurrentUserService : ICurrentUserService {
   private readonly IHttpContextAccessor _httpContextAccessor;

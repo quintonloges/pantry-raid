@@ -1,11 +1,9 @@
-using System;
+using Microsoft.AspNetCore.Identity;
 using Loges.PantryRaid.Models.Interfaces;
 
 namespace Loges.PantryRaid.Models;
 
-public abstract class AuditedEntity : IAuditedEntity {
-  public int Id { get; set; }
-  
+public class AppUser : IdentityUser, IAuditedEntity {
   public DateTime CreatedAt { get; set; }
   public string? CreatedBy { get; set; }
   
@@ -16,3 +14,4 @@ public abstract class AuditedEntity : IAuditedEntity {
   public DateTime? DeletedAt { get; set; }
   public string? DeletedBy { get; set; }
 }
+

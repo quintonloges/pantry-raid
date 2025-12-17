@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Loges.PantryRaid.Models\Loges.PantryRaid.Models.csproj" />
+    <ProjectReference Include="..\Loges.PantryRaid.Services\Loges.PantryRaid.Services.csproj" />
   </ItemGroup>
 
 </Project>
