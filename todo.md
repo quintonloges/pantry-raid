@@ -113,15 +113,15 @@
 - [x] `GET /api/auth/me` (auth required) → email
 
 ### Account Management (MVP)
-- [ ] `POST /api/auth/change-password` (auth required)
-- [ ] `DELETE /api/auth/account` (auth required) → soft delete user
-- [ ] Enforce: soft deleted user cannot login / cannot access `/me`
+- [x] `POST /api/auth/change-password` (auth required)
+- [x] `DELETE /api/auth/account` (auth required) → soft delete user
+- [x] Enforce: soft deleted user cannot login / cannot access `/me`
 
 ### Tests (Integration)
-- [ ] Register → Login → /me success
-- [ ] Wrong password → 401
-- [ ] Change password works
-- [ ] Account delete blocks future login and /me access
+- [x] Register → Login → /me success
+- [x] Wrong password → 401
+- [x] Change password works
+- [x] Account delete blocks future login and /me access
 
 ---
 
