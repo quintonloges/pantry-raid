@@ -36,6 +36,7 @@ public class PantryRaidWebApplicationFactory : WebApplicationFactory<Program>, I
 
   public new async Task DisposeAsync() {
     await _mySqlContainer.DisposeAsync();
+    await base.DisposeAsync();
   }
 
   protected override void ConfigureWebHost(IWebHostBuilder builder) {
