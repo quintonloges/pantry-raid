@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Loges.PantryRaid.WebAPI\Loges.PantryRaid.WebAPI.csproj" />
+    <ProjectReference Include="..\Loges.PantryRaid.Dtos\Loges.PantryRaid.Dtos.csproj" />
   </ItemGroup>
 
   <ItemGroup>
