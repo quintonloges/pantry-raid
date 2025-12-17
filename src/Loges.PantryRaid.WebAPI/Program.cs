@@ -1,8 +1,79 @@
-var builder = WebApplication.CreateBuilder(args);
+using Loges.PantryRaid.EFCore;
+using Loges.PantryRaid.Models;
+using Loges.PantryRaid.Services.Interfaces;
+using Loges.PantryRaid.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using NSwag;
+using NSwag.Generation.Processors.Security;
+using System.Text;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApiDocument();
-var app = builder.Build();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// Configure NSwag with JWT support
+builder.Services.AddOpenApiDocument(config => {
+  config.Title = "PantryRaid API";
+  config.AddSecurity("Bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme {
+    Type = OpenApiSecuritySchemeType.Http,
+    Scheme = "Bearer",
+    BearerFormat = "JWT", 
+    Description = "Enter your valid JWT token."
+  });
+
+  config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("Bearer"));
+});
+
+string? connectionString = builder.Configuration.GetConnectionString("Default");
+if (string.IsNullOrEmpty(connectionString)) {
+  throw new InvalidOperationException("Connection string 'Default' not found.");
+}
+
+builder.Services.AddDbContext<AppDbContext>(options => {
+  // Check if we're in design-time mode (e.g. running 'dotnet ef migrations')
+  // In design-time, we might not have a running DB, so we can't auto-detect server version.
+  // We'll fallback to a specific version (e.g. 8.0.36) to allow migrations to generate.
+  // Or we just try/catch the auto-detect.
+  try {
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+  }
+  catch (Exception) {
+    // Fallback for design-time or if DB is offline.
+    // We'll use a default version (e.g. 8.0.36) to allow the context to be built.
+    // This handles MySqlConnector.MySqlException, SocketException, etc.
+    options.UseMySql(connectionString, ServerVersion.Parse("8.0.36-mysql"));
+  }
+});
+
+// Identity
+builder.Services.AddIdentity<AppUser, IdentityRole>()
+  .AddEntityFrameworkStores<AppDbContext>()
+  .AddDefaultTokenProviders();
+
+// Authentication & JWT
+builder.Services.AddAuthentication(options => {
+  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options => {
+  options.SaveToken = true;
+  options.RequireHttpsMetadata = false;
+  options.TokenValidationParameters = new TokenValidationParameters() {
+    ValidateIssuer = true,
+    ValidateAudience = true,
+    ValidAudience = builder.Configuration["Jwt:Audience"],
+    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+  };
+});
+
+WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment()) {
   // Add OpenAPI 3.0 document serving middleware
@@ -12,6 +83,9 @@ if (app.Environment.IsDevelopment()) {
   // Available at: http://localhost:<port>/swagger
   app.UseSwaggerUi(); // UseSwaggerUI Protected by if (env.IsDevelopment())
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
