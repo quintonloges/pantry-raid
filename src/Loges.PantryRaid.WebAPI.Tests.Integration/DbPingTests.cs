@@ -13,14 +13,14 @@ public class DbPingTests : IClassFixture<PantryRaidWebApplicationFactory> {
   [Fact]
   public async Task Get_DbPing_Returns200AndOk() {
     // Arrange
-    var client = _factory.CreateClient();
+    HttpClient client = _factory.CreateClient();
 
     // Act
-    var response = await client.GetAsync("/api/db/ping");
+    HttpResponseMessage response = await client.GetAsync("/api/db/ping");
 
     // Assert
     response.EnsureSuccessStatusCode();
-    var content = await response.Content.ReadFromJsonAsync<DbPingResponse>();
+    DbPingResponse? content = await response.Content.ReadFromJsonAsync<DbPingResponse>();
     Assert.NotNull(content);
     Assert.Equal("ok", content.db);
   }

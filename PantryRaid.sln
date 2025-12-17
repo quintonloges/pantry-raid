@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Loges.PantryRaid.Services",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Loges.PantryRaid.Models", "src\Loges.PantryRaid.Models\Loges.PantryRaid.Models.csproj", "{1F2AA144-6D04-4AFC-80A3-13C15ED000D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Loges.PantryRaid.WebAPI.Tests.Integration", "src\Loges.PantryRaid.WebAPI.Tests.Integration\Loges.PantryRaid.WebAPI.Tests.Integration.csproj", "{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,18 @@ Global
 		{1F2AA144-6D04-4AFC-80A3-13C15ED000D2}.Release|x64.Build.0 = Release|Any CPU
 		{1F2AA144-6D04-4AFC-80A3-13C15ED000D2}.Release|x86.ActiveCfg = Release|Any CPU
 		{1F2AA144-6D04-4AFC-80A3-13C15ED000D2}.Release|x86.Build.0 = Release|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Debug|x64.Build.0 = Debug|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Debug|x86.Build.0 = Debug|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Release|x64.ActiveCfg = Release|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Release|x64.Build.0 = Release|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Release|x86.ActiveCfg = Release|Any CPU
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -110,5 +124,6 @@ Global
 		{48A9C793-55CC-459B-ABFF-7B36EF5826CA} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{7CB36F51-E48A-4AB3-9195-3FB16959C4D6} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{1F2AA144-6D04-4AFC-80A3-13C15ED000D2} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{A5ACD801-EEF3-4B6B-9983-3FF13A36443D} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

@@ -1,11 +1,19 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Loges.PantryRaid.Models;
-using System.Linq.Expressions;
+using Loges.PantryRaid.Models.Interfaces;
+using Loges.PantryRaid.Services.Interfaces;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Reflection;
 
 namespace Loges.PantryRaid.EFCore;
 
-public class AppDbContext : DbContext {
-  public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {
+public class AppDbContext : IdentityDbContext<AppUser> {
+  private readonly ICurrentUserService? _currentUserService;
+
+  public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserService? currentUserService = null) : base(options) {
+    _currentUserService = currentUserService;
   }
 
   public DbSet<SystemNote> SystemNotes { get; set; }
@@ -13,19 +21,19 @@ public class AppDbContext : DbContext {
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     base.OnModelCreating(modelBuilder);
 
-    foreach (var entityType in modelBuilder.Model.GetEntityTypes()) {
-      if (typeof(AuditedEntity).IsAssignableFrom(entityType.ClrType)) {
-        var method = SetGlobalQueryFilterMethod.MakeGenericMethod(entityType.ClrType);
+    foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes()) {
+      if (typeof(IAuditedEntity).IsAssignableFrom(entityType.ClrType)) {
+        MethodInfo method = SetGlobalQueryFilterMethod.MakeGenericMethod(entityType.ClrType);
         method.Invoke(this, new object[] { modelBuilder });
       }
     }
   }
 
-  static readonly System.Reflection.MethodInfo SetGlobalQueryFilterMethod = typeof(AppDbContext)
-    .GetMethods(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+  static readonly MethodInfo SetGlobalQueryFilterMethod = typeof(AppDbContext)
+    .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
     .Single(t => t.IsGenericMethod && t.Name == nameof(SetGlobalQueryFilter));
 
-  private void SetGlobalQueryFilter<T>(ModelBuilder builder) where T : AuditedEntity {
+  private void SetGlobalQueryFilter<T>(ModelBuilder builder) where T : class, IAuditedEntity {
     builder.Entity<T>().HasQueryFilter(e => !e.IsDeleted);
   }
 
@@ -40,12 +48,14 @@ public class AppDbContext : DbContext {
   }
 
   private void ApplyAuditInformation() {
-    var entries = ChangeTracker.Entries<AuditedEntity>();
-    var utcNow = DateTime.UtcNow;
+    IEnumerable<EntityEntry<IAuditedEntity>> entries = ChangeTracker.Entries<IAuditedEntity>();
+    DateTime utcNow = DateTime.UtcNow;
+    string? user = _currentUserService?.UserId;
 
-    foreach (var entry in entries) {
+    foreach (EntityEntry<IAuditedEntity> entry in entries) {
       if (entry.State == EntityState.Added) {
         entry.Entity.CreatedAt = utcNow;
+        entry.Entity.CreatedBy = user;
         entry.Entity.IsDeleted = false;
       } else if (entry.State == EntityState.Modified) {
         // Prevent modification of CreatedAt
@@ -53,12 +63,15 @@ public class AppDbContext : DbContext {
         entry.Property(x => x.CreatedBy).IsModified = false;
         
         entry.Entity.UpdatedAt = utcNow;
+        entry.Entity.UpdatedBy = user;
       } else if (entry.State == EntityState.Deleted) {
         // Soft delete
         entry.State = EntityState.Modified;
         entry.Entity.IsDeleted = true;
         entry.Entity.DeletedAt = utcNow;
-        entry.Entity.UpdatedAt = utcNow; // Also update updated_at? Usually yes or no. Let's do yes.
+        entry.Entity.DeletedBy = user;
+        entry.Entity.UpdatedAt = utcNow; 
+        entry.Entity.UpdatedBy = user;
       }
     }
   }

@@ -2,7 +2,7 @@ using Loges.PantryRaid.EFCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Loges.PantryRaid.WebAPI.Controllers;
+namespace Loges.PantryRaid.WebAPI.Controllers.Db;
 
 [Route("api/db")]
 [ApiController]

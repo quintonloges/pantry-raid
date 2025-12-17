@@ -7,12 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Loges.PantryRaid.Models\Loges.PantryRaid.Models.csproj" />
+    <ProjectReference Include="..\Loges.PantryRaid.Services\Loges.PantryRaid.Services.csproj" />
   </ItemGroup>
 
 </Project>

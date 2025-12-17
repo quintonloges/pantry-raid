@@ -19,8 +19,8 @@ public class PantryRaidWebApplicationFactory : WebApplicationFactory<Program>, I
     await _mySqlContainer.StartAsync();
 
     // Use the factory's service provider to create a scope and migrate
-    using var scope = Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    using IServiceScope scope = Services.CreateScope();
+    AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     
     // Using EnsureCreatedAsync ensures the DB exists and schema is compatible with model.
     // For strict migration testing, we would use MigrateAsync(), but that requires migration files to exist.
@@ -36,6 +36,7 @@ public class PantryRaidWebApplicationFactory : WebApplicationFactory<Program>, I
 
   public new async Task DisposeAsync() {
     await _mySqlContainer.DisposeAsync();
+    await base.DisposeAsync();
   }
 
   protected override void ConfigureWebHost(IWebHostBuilder builder) {
