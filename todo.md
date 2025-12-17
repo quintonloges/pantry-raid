@@ -127,17 +127,17 @@
 
 ## 6) Admin Role + Policies + Seeding
 
-- [ ] Add role-based auth (`Admin`)
-- [ ] Add admin-only endpoint: `GET /api/admin/ping` → `{ "admin": "ok" }`
-- [ ] Add role seeding (idempotent):
-  - [ ] Ensure Admin role exists
-  - [ ] Optional bootstrap admin user if env vars provided:
-    - [ ] `ADMIN_EMAIL`
-    - [ ] `ADMIN_PASSWORD`
+- [x] Add role-based auth (`Admin`)
+- [x] Add admin-only endpoint: `GET /api/admin/ping` → `{ "admin": "ok" }`
+- [x] Add role seeding (idempotent):
+  - [x] Ensure Admin role exists
+  - [x] Optional bootstrap admin user if env vars provided:
+    - [x] `ADMIN_EMAIL`
+    - [x] `ADMIN_PASSWORD`
 
 ### Tests
-- [ ] Normal user gets 403 on admin ping
-- [ ] Bootstrap admin gets 200 on admin ping
+- [x] Normal user gets 403 on admin ping
+- [x] Bootstrap admin gets 200 on admin ping
 
 ---
 

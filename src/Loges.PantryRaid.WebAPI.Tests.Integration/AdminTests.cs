@@ -30,6 +30,7 @@ public class AdminTests : IClassFixture<PantryRaidWebApplicationFactory> {
       Email = email,
       Password = password
     });
+    Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
     LoginResult? loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResult>();
     string token = loginResult!.Token!;
 
