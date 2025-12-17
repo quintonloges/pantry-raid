@@ -82,6 +82,9 @@ WebApplication app = builder.Build();
 using (IServiceScope scope = app.Services.CreateScope()) {
   IServiceProvider services = scope.ServiceProvider;
   try {
+    AppDbContext context = services.GetRequiredService<AppDbContext>();
+    await context.Database.MigrateAsync();
+
     IDbSeeder seeder = services.GetRequiredService<IDbSeeder>();
     await seeder.SeedAsync();
   } catch (Exception ex) {
