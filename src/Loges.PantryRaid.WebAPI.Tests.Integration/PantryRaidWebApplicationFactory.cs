@@ -15,8 +15,13 @@ public class PantryRaidWebApplicationFactory : WebApplicationFactory<Program>, I
     .WithImage("mysql:8.0")
     .Build();
 
+  // Use AsyncLocal to pass the connection string to derived factories (created via WithWebHostBuilder)
+  // while maintaining isolation between parallel test classes.
+  private static readonly AsyncLocal<string?> _sharedConnectionString = new();
+
   public async Task InitializeAsync() {
     await _mySqlContainer.StartAsync();
+    _sharedConnectionString.Value = _mySqlContainer.GetConnectionString();
 
     // Use the factory's service provider to create a scope and migrate
     using IServiceScope scope = Services.CreateScope();
@@ -44,10 +49,15 @@ public class PantryRaidWebApplicationFactory : WebApplicationFactory<Program>, I
       // Remove the existing DbContext registration
       services.RemoveAll(typeof(DbContextOptions<AppDbContext>));
 
+      // Use the local container if running, otherwise fallback to the shared connection string (for derived factories)
+      string connectionString = _mySqlContainer.State == DotNet.Testcontainers.Containers.TestcontainersStates.Running
+        ? _mySqlContainer.GetConnectionString()
+        : _sharedConnectionString.Value ?? throw new InvalidOperationException("Database container is not running and no shared connection string is available.");
+
       // Add DbContext using the container's connection string
       services.AddDbContext<AppDbContext>(options =>
-        options.UseMySql(_mySqlContainer.GetConnectionString(), 
-          ServerVersion.AutoDetect(_mySqlContainer.GetConnectionString())));
+        options.UseMySql(connectionString, 
+          ServerVersion.AutoDetect(connectionString)));
     });
   }
 }
