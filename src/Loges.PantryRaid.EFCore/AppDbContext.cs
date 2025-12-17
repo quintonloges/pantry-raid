@@ -24,10 +24,16 @@ public class AppDbContext : IdentityDbContext<AppUser> {
 
     modelBuilder.Entity<Ingredient>(entity => {
       entity.HasIndex(e => e.Slug).IsUnique();
-      entity.Property(e => e.Aliases).HasConversion(
-        v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
-        v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>()
-      );
+      entity.Property(e => e.Aliases)
+        .HasConversion(
+          v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+          v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>()
+        )
+        .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+          (c1, c2) => c1!.SequenceEqual(c2!),
+          c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+          c => c.ToList()
+        ));
     });
 
     foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes()) {
