@@ -19,6 +19,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuditingInterceptor>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IAdminIngredientService, AdminIngredientService>();
+builder.Services.AddScoped<IIngredientGroupService, IngredientGroupService>();
 
 // Configure NSwag with JWT support
 builder.Services.AddOpenApiDocument(config => {

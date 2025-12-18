@@ -14,6 +14,8 @@ public class AppDbContext : IdentityDbContext<AppUser> {
 
   public DbSet<SystemNote> SystemNotes { get; set; }
   public DbSet<Ingredient> Ingredients { get; set; }
+  public DbSet<IngredientGroup> IngredientGroups { get; set; }
+  public DbSet<IngredientGroupItem> IngredientGroupItems { get; set; }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     base.OnModelCreating(modelBuilder);

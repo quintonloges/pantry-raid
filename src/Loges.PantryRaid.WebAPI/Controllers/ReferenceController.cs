@@ -1,6 +1,7 @@
 using Loges.PantryRaid.Dtos;
 using Loges.PantryRaid.EFCore;
 using Loges.PantryRaid.Models;
+using Loges.PantryRaid.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,9 +11,16 @@ namespace Loges.PantryRaid.WebAPI.Controllers;
 [ApiController]
 public class ReferenceController : ControllerBase {
   private readonly AppDbContext _context;
+  private readonly IIngredientGroupService _ingredientGroupService;
 
-  public ReferenceController(AppDbContext context) {
+  public ReferenceController(AppDbContext context, IIngredientGroupService ingredientGroupService) {
     _context = context;
+    _ingredientGroupService = ingredientGroupService;
+  }
+
+  [HttpGet("ingredient-groups")]
+  public async Task<ActionResult<IEnumerable<IngredientGroupDto>>> GetIngredientGroups() {
+    return Ok(await _ingredientGroupService.GetAllGroupsAsync());
   }
 
   [HttpGet("ingredients")]
