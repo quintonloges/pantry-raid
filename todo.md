@@ -127,39 +127,39 @@
 
 ## 6) Admin Role + Policies + Seeding
 
-- [ ] Add role-based auth (`Admin`)
-- [ ] Add admin-only endpoint: `GET /api/admin/ping` → `{ "admin": "ok" }`
-- [ ] Add role seeding (idempotent):
-  - [ ] Ensure Admin role exists
-  - [ ] Optional bootstrap admin user if env vars provided:
-    - [ ] `ADMIN_EMAIL`
-    - [ ] `ADMIN_PASSWORD`
+- [x] Add role-based auth (`Admin`)
+- [x] Add admin-only endpoint: `GET /api/admin/ping` → `{ "admin": "ok" }`
+- [x] Add role seeding (idempotent):
+  - [x] Ensure Admin role exists
+  - [x] Optional bootstrap admin user if env vars provided:
+    - [x] `ADMIN_EMAIL`
+    - [x] `ADMIN_PASSWORD`
 
 ### Tests
-- [ ] Normal user gets 403 on admin ping
-- [ ] Bootstrap admin gets 200 on admin ping
+- [x] Normal user gets 403 on admin ping
+- [x] Bootstrap admin gets 200 on admin ping
 
 ---
 
 ## 7) Ingredients (Reference + Admin CRUD)
 
 ### Data Model
-- [ ] Add `Ingredient` entity:
-  - [ ] `id`
-  - [ ] `name`
-  - [ ] `slug` (unique)
-  - [ ] `aliases` (JSON array)
-  - [ ] `category`
-  - [ ] `notes`
-  - [ ] `global_recipe_count`
-  - [ ] audit + soft delete
-- [ ] Add unique index on `slug`
-- [ ] Add case-insensitive uniqueness rules for name (app-level validation)
+- [x] Add `Ingredient` entity:
+  - [x] `id`
+  - [x] `name`
+  - [x] `slug` (unique)
+  - [x] `aliases` (JSON array)
+  - [x] `category`
+  - [x] `notes`
+  - [x] `global_recipe_count`
+  - [x] audit + soft delete
+- [x] Add unique index on `slug`
+- [x] Add case-insensitive uniqueness rules for name (app-level validation)
 
 ### Public Endpoint
-- [ ] `GET /api/reference/ingredients?query=...`
-  - [ ] Returns controlled list
-  - [ ] Sorted by `name`
+- [x] `GET /api/reference/ingredients?query=...`
+  - [x] Returns controlled list
+  - [x] Sorted by `name`
 
 ### Admin CRUD
 - [ ] `POST /api/admin/ingredients`
@@ -167,9 +167,9 @@
 - [ ] `DELETE /api/admin/ingredients/{id}` (soft delete)
 
 ### Tests
-- [ ] Public endpoint returns sorted
-- [ ] Slug uniqueness enforced
-- [ ] Deleted ingredient not returned
+- [x] Public endpoint returns sorted
+- [x] Slug uniqueness enforced
+- [x] Deleted ingredient not returned
 - [ ] Non-admin forbidden for CRUD
 
 ---
