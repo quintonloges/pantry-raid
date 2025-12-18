@@ -1,5 +1,6 @@
 using Loges.PantryRaid.EFCore;
 using Loges.PantryRaid.Models;
+using Loges.PantryRaid.Models.Interfaces;
 using Loges.PantryRaid.Services.Interfaces;
 using Loges.PantryRaid.Services;
 using Loges.PantryRaid.WebAPI.Data;
@@ -16,6 +17,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IAdminIngredientService, AdminIngredientService>();
 
 // Configure NSwag with JWT support
 builder.Services.AddOpenApiDocument(config => {

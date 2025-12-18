@@ -144,22 +144,22 @@
 ## 7) Ingredients (Reference + Admin CRUD)
 
 ### Data Model
-- [ ] Add `Ingredient` entity:
-  - [ ] `id`
-  - [ ] `name`
-  - [ ] `slug` (unique)
-  - [ ] `aliases` (JSON array)
-  - [ ] `category`
-  - [ ] `notes`
-  - [ ] `global_recipe_count`
-  - [ ] audit + soft delete
-- [ ] Add unique index on `slug`
-- [ ] Add case-insensitive uniqueness rules for name (app-level validation)
+- [x] Add `Ingredient` entity:
+  - [x] `id`
+  - [x] `name`
+  - [x] `slug` (unique)
+  - [x] `aliases` (JSON array)
+  - [x] `category`
+  - [x] `notes`
+  - [x] `global_recipe_count`
+  - [x] audit + soft delete
+- [x] Add unique index on `slug`
+- [x] Add case-insensitive uniqueness rules for name (app-level validation)
 
 ### Public Endpoint
-- [ ] `GET /api/reference/ingredients?query=...`
-  - [ ] Returns controlled list
-  - [ ] Sorted by `name`
+- [x] `GET /api/reference/ingredients?query=...`
+  - [x] Returns controlled list
+  - [x] Sorted by `name`
 
 ### Admin CRUD
 - [ ] `POST /api/admin/ingredients`
@@ -167,9 +167,9 @@
 - [ ] `DELETE /api/admin/ingredients/{id}` (soft delete)
 
 ### Tests
-- [ ] Public endpoint returns sorted
-- [ ] Slug uniqueness enforced
-- [ ] Deleted ingredient not returned
+- [x] Public endpoint returns sorted
+- [x] Slug uniqueness enforced
+- [x] Deleted ingredient not returned
 - [ ] Non-admin forbidden for CRUD
 
 ---

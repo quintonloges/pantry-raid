@@ -1,4 +1,4 @@
-using Loges.PantryRaid.Services.Interfaces;
+using Loges.PantryRaid.Models.Interfaces;
 using Microsoft.AspNetCore.Http;
 
 namespace Loges.PantryRaid.Services;
