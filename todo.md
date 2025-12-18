@@ -177,24 +177,24 @@
 ## 8) Ingredient Groups (Quick Add)
 
 ### Data Model
-- [ ] `IngredientGroup`:
-  - [ ] id, name, description(optional), audit/soft delete
-- [ ] `IngredientGroupItem`:
-  - [ ] id, ingredient_group_id, ingredient_id, order_index
+- [x] `IngredientGroup`:
+  - [x] id, name, description(optional), audit/soft delete
+- [x] `IngredientGroupItem`:
+  - [x] id, ingredient_group_id, ingredient_id, order_index
 
 ### Public Endpoint
-- [ ] `GET /api/reference/ingredient-groups`
-  - [ ] Includes items with ingredient name + id
-  - [ ] Ordered by `order_index`
+- [x] `GET /api/reference/ingredient-groups`
+  - [x] Includes items with ingredient name + id
+  - [x] Ordered by `order_index`
 
 ### Admin Endpoints
-- [ ] CRUD groups
-- [ ] Replace items list (transactional, no orphans)
+- [x] CRUD groups
+- [x] Replace items list (transactional, no orphans)
 
 ### Tests
-- [ ] Admin can create group + items
-- [ ] Public sees ordered items
-- [ ] Replace list is idempotent and transactional
+- [x] Admin can create group + items
+- [x] Public sees ordered items
+- [x] Replace list is idempotent and transactional
 
 ---
 

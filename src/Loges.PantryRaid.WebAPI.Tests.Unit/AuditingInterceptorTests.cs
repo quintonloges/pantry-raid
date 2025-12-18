@@ -60,8 +60,8 @@ public class AuditingInterceptorTests {
     // Act
     using (TestDbContext context = new TestDbContext(_options)) {
       _mockCurrentUserService.Setup(s => s.UserId).Returns(modifierId);
-      TestEntity entity = await context.TestEntities.FindAsync(1);
-      entity!.Name = "Modified";
+      TestEntity entity = (await context.TestEntities.FindAsync(1))!;
+      entity.Name = "Modified";
       
       // Wait a bit to ensure timestamps differ
       await Task.Delay(10);
@@ -91,12 +91,12 @@ public class AuditingInterceptorTests {
     // Act
     using (TestDbContext context = new TestDbContext(_options)) {
       _mockCurrentUserService.Setup(s => s.UserId).Returns(deleterId);
-      TestEntity entity = await context.TestEntities.FindAsync(1);
-      context.TestEntities.Remove(entity!);
+      TestEntity entity = (await context.TestEntities.FindAsync(1))!;
+      context.TestEntities.Remove(entity);
       await context.SaveChangesAsync();
       
       // Assert state in memory
-      Assert.True(entity!.IsDeleted);
+      Assert.True(entity.IsDeleted);
       Assert.Equal(deleterId, entity.DeletedBy);
       Assert.NotEqual(default, entity.DeletedAt);
       Assert.Equal(EntityState.Unchanged, context.Entry(entity).State); // It was marked Modified then saved, so now Unchanged
@@ -109,7 +109,7 @@ public class AuditingInterceptorTests {
       // The Query Filter is configured in AppDbContext. 
       // Here we test the Interceptor's job: setting the flags and changing state to Modified.
       
-      TestEntity deletedEntity = await verifyContext.TestEntities.FindAsync(1);
+      TestEntity deletedEntity = (await verifyContext.TestEntities.FindAsync(1))!;
       Assert.NotNull(deletedEntity);
       Assert.True(deletedEntity.IsDeleted);
     }
