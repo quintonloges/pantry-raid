@@ -162,15 +162,15 @@
   - [x] Sorted by `name`
 
 ### Admin CRUD
-- [ ] `POST /api/admin/ingredients`
-- [ ] `PUT /api/admin/ingredients/{id}`
-- [ ] `DELETE /api/admin/ingredients/{id}` (soft delete)
+- [x] `POST /api/admin/ingredients`
+- [x] `PUT /api/admin/ingredients/{id}`
+- [x] `DELETE /api/admin/ingredients/{id}` (soft delete)
 
 ### Tests
 - [x] Public endpoint returns sorted
 - [x] Slug uniqueness enforced
 - [x] Deleted ingredient not returned
-- [ ] Non-admin forbidden for CRUD
+- [x] Non-admin forbidden for CRUD
 
 ---
 
