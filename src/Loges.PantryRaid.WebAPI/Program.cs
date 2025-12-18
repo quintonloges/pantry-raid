@@ -1,8 +1,8 @@
 using Loges.PantryRaid.EFCore;
 using Loges.PantryRaid.Models;
-using Loges.PantryRaid.Models.Interfaces;
 using Loges.PantryRaid.Services.Interfaces;
 using Loges.PantryRaid.Services;
+using Loges.PantryRaid.Services.Interceptors;
 using Loges.PantryRaid.WebAPI.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -16,6 +16,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuditingInterceptor>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IAdminIngredientService, AdminIngredientService>();
 
@@ -37,7 +38,7 @@ if (string.IsNullOrEmpty(connectionString)) {
   throw new InvalidOperationException("Connection string 'Default' not found.");
 }
 
-builder.Services.AddDbContext<AppDbContext>(options => {
+builder.Services.AddDbContext<AppDbContext>((sp, options) => {
   // Check if we're in design-time mode (e.g. running 'dotnet ef migrations')
   // In design-time, we might not have a running DB, so we can't auto-detect server version.
   // We'll fallback to a specific version (e.g. 8.0.36) to allow migrations to generate.
@@ -51,6 +52,8 @@ builder.Services.AddDbContext<AppDbContext>(options => {
     // This handles MySqlConnector.MySqlException, SocketException, etc.
     options.UseMySql(connectionString, ServerVersion.Parse("8.0.36-mysql"));
   }
+
+  options.AddInterceptors(sp.GetRequiredService<AuditingInterceptor>());
 });
 
 // Identity
