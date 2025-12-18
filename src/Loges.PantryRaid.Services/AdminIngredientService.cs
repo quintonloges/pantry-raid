@@ -41,7 +41,7 @@ public class AdminIngredientService : IAdminIngredientService {
   }
 
   public async Task<IngredientDto> UpdateIngredientAsync(int id, IngredientUpdateDto dto) {
-    Ingredient ingredient = await _context.Ingredients.FindAsync(id);
+    Ingredient? ingredient = await _context.Ingredients.FindAsync(id);
     if (ingredient == null) {
       throw new KeyNotFoundException($"Ingredient with ID {id} not found.");
     }
@@ -71,7 +71,7 @@ public class AdminIngredientService : IAdminIngredientService {
   }
 
   public async Task DeleteIngredientAsync(int id) {
-    Ingredient ingredient = await _context.Ingredients.FindAsync(id);
+    Ingredient? ingredient = await _context.Ingredients.FindAsync(id);
     if (ingredient == null) {
       // Idempotent delete? Or throw? Usually idempotent is nicer, but for explicit admin delete maybe throw if not found.
       // Given it's an API, 404 is appropriate if not found.
