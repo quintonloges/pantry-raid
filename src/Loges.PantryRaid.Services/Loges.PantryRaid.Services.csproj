@@ -10,4 +10,10 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Loges.PantryRaid.Dtos\Loges.PantryRaid.Dtos.csproj" />
+    <ProjectReference Include="..\Loges.PantryRaid.EFCore\Loges.PantryRaid.EFCore.csproj" />
+    <ProjectReference Include="..\Loges.PantryRaid.Models\Loges.PantryRaid.Models.csproj" />
+  </ItemGroup>
+
 </Project>
