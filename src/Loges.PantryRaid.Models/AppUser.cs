@@ -13,5 +13,7 @@ public class AppUser : IdentityUser, IAuditedEntity {
   public bool IsDeleted { get; set; }
   public DateTime? DeletedAt { get; set; }
   public string? DeletedBy { get; set; }
+
+  public virtual ICollection<UserIngredient> UserIngredients { get; set; } = new List<UserIngredient>();
 }
 
