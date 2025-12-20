@@ -82,8 +82,46 @@ public class RecipeTests : IClassFixture<PantryRaidWebApplicationFactory> {
     Assert.Contains(sources!, s => s.Id == source.Id);
   }
 
+  [Fact]
+  public async Task NormalUser_CannotCreate_Source_Or_Recipe() {
+    HttpClient client = _factory.CreateClient();
+    string email = $"user_{Guid.NewGuid()}@example.com";
+    string password = "Password123!";
+
+    // 1. Register & Login
+    await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest {
+      Email = email,
+      Password = password
+    });
+    HttpResponseMessage loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest {
+      Email = email,
+      Password = password
+    });
+    LoginResult? loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResult>();
+    string token = loginResult!.Token!;
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+    // 2. Try Create Source
+    CreateRecipeSourceDto createSourceDto = new CreateRecipeSourceDto {
+      Name = "Hacker Source",
+      BaseUrl = "https://hacker.com",
+      IsActive = true
+    };
+    HttpResponseMessage sourceResponse = await client.PostAsJsonAsync("/api/admin/recipe-sources", createSourceDto);
+    Assert.Equal(HttpStatusCode.Forbidden, sourceResponse.StatusCode);
+
+    // 3. Try Create Recipe
+    CreateRecipeDto createRecipeDto = new CreateRecipeDto {
+      Title = "Hacker Recipe",
+      RecipeSourceId = 1,
+      SourceUrl = "https://hacker.com/recipe",
+      Ingredients = new List<CreateRecipeIngredientDto>()
+    };
+    HttpResponseMessage recipeResponse = await client.PostAsJsonAsync("/api/admin/recipes", createRecipeDto);
+    Assert.Equal(HttpStatusCode.Forbidden, recipeResponse.StatusCode);
+  }
+
   private class LoginResult {
       public string? Token { get; set; }
   }
 }
-
