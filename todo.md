@@ -223,112 +223,112 @@
 ## 10) Recipes + Sources + Recipe Ingredients (MVP Seed)
 
 ### Data Model
-- [ ] `RecipeSource`: id, name, base_url, scraper_key, is_active
-- [ ] `Recipe`: fields from spec (no instructions stored)
-- [ ] `RecipeIngredient`: recipe_id, ingredient_id, original_text, quantity, unit, order_index, is_optional
+- [x] `RecipeSource`: id, name, base_url, scraper_key, is_active
+- [x] `Recipe`: fields from spec (no instructions stored)
+- [x] `RecipeIngredient`: recipe_id, ingredient_id, original_text, quantity, unit, order_index, is_optional
 
 ### Constraints / Indexes
-- [ ] Index on `Recipe.source_url` (unique or effectively unique)
-- [ ] Index on (`recipe_source_id`, `source_recipe_id`) if used
-- [ ] Enforce soft delete
+- [x] Index on `Recipe.source_url` (unique or effectively unique)
+- [x] Index on (`recipe_source_id`, `source_recipe_id`) if used
+- [x] Enforce soft delete
 
 ### Endpoints
-- [ ] Admin:
-  - [ ] `POST /api/admin/recipe-sources`
-  - [ ] `POST /api/admin/recipes` (includes ingredient lines)
-- [ ] Public:
-  - [ ] `GET /api/reference/sources`
+- [x] Admin:
+  - [x] `POST /api/admin/recipe-sources`
+  - [x] `POST /api/admin/recipes` (includes ingredient lines)
+- [x] Public:
+  - [x] `GET /api/reference/sources`
 
 ### Tests
-- [ ] Admin can create source + recipe + ingredients
-- [ ] Public sees sources
-- [ ] Confirm no “instructions” storage exists in schema/contracts
+- [x] Admin can create source + recipe + ingredients
+- [x] Public sees sources
+- [x] Confirm no “instructions” storage exists in schema/contracts
 
 ---
 
 ## 11) Filter Metadata (Cuisine / Protein / Dietary Tags)
 
 ### Data Model
-- [ ] `Cuisine`, `Protein`, `DietaryTag`
-- [ ] Join tables:
-  - [ ] `recipe_cuisine`
-  - [ ] `recipe_protein`
-  - [ ] `recipe_dietary_tag`
+- [x] `Cuisine`, `Protein`, `DietaryTag`
+- [x] Join tables:
+  - [x] `recipe_cuisine`
+  - [x] `recipe_protein`
+  - [x] `recipe_dietary_tag`
 
 ### Endpoints
-- [ ] Public:
-  - [ ] `GET /api/reference/cuisines`
-  - [ ] `GET /api/reference/proteins`
-  - [ ] `GET /api/reference/dietary-tags`
-- [ ] Admin:
-  - [ ] CRUD each list
-  - [ ] Replace assignments for recipe tags (idempotent)
+- [x] Public:
+  - [x] `GET /api/reference/cuisines`
+  - [x] `GET /api/reference/proteins`
+  - [x] `GET /api/reference/dietary-tags`
+- [x] Admin:
+  - [x] CRUD each list
+  - [x] Replace assignments for recipe tags (idempotent)
 
 ### Tests
-- [ ] Admin creates tags
-- [ ] Admin assigns tags to recipe
-- [ ] Public lists tags
-- [ ] Assignments persist
+- [x] Admin creates tags
+- [x] Admin assigns tags to recipe
+- [x] Public lists tags
+- [x] Assignments persist
 
 ---
 
 ## 12) Search API Contract (DTOs + Endpoint Shell)
 
-- [ ] Define request DTO for `POST /api/search`:
-  - [ ] ingredient_ids
-  - [ ] filters (protein, cuisines, dietary tags, must include ingredients, sources)
-  - [ ] allow_substitutions
-  - [ ] paging cursor (nullable, v1 can ignore)
-- [ ] Define response DTO:
-  - [ ] groups 0–3 missing, always present
-  - [ ] recipe metadata
-  - [ ] breakdown: have / missing / substitution notes
-  - [ ] cursor (nullable)
+- [x] Define request DTO for `POST /api/search`:
+  - [x] ingredient_ids
+  - [x] filters (protein, cuisines, dietary tags, must include ingredients, sources)
+  - [x] allow_substitutions
+  - [x] paging cursor (nullable, v1 can ignore)
+- [x] Define response DTO:
+  - [x] groups 0–3 missing, always present
+  - [x] recipe metadata
+  - [x] breakdown: have / missing / substitution notes
+  - [x] cursor (nullable)
 
 ### Tests
-- [ ] Integration test seeds DB and asserts response JSON shape (even if empty results)
-- [ ] Swagger reflects DTO schema
+- [x] Integration test seeds DB and asserts response JSON shape (even if empty results)
+- [x] Swagger reflects DTO schema
 
 ---
 
 ## 13) Search v1 Implementation (Exact Match Only)
 
-- [ ] Implement hard filters (AND logic):
-  - [ ] protein (single)
-  - [ ] cuisines (multi)
-  - [ ] dietary tags (multi)
-  - [ ] must-include ingredients (subset check)
-  - [ ] recipe sources (multi)
-- [ ] Compute coverage against required ingredients only (`is_optional == false`)
-- [ ] Exclude recipes with > 3 missing required ingredients
-- [ ] Group results by missing count (0–3)
-- [ ] Sort alphabetically by recipe title within each group
-- [ ] Return have/missing lists (substitution notes empty)
+- [x] Implement hard filters (AND logic):
+  - [x] protein (single)
+  - [x] cuisines (multi)
+  - [x] dietary tags (multi)
+  - [x] must-include ingredients (subset check)
+  - [x] recipe sources (multi)
+- [x] Compute coverage against required ingredients only (`is_optional == false`)
+- [x] Exclude recipes with > 3 missing required ingredients
+- [x] Group results by missing count (0–3)
+- [x] Sort alphabetically by recipe title within each group
+- [x] Return have/missing lists (substitution notes empty)
 
 ### Tests (Integration)
-- [ ] Exact match shows in group 0
-- [ ] 1/2/3 missing grouped correctly
-- [ ] >3 missing excluded
-- [ ] Each filter includes/excludes correctly
-- [ ] Sorting stable and correct
+- [x] Exact match shows in group 0
+- [x] 1/2/3 missing grouped correctly
+- [x] >3 missing excluded
+- [x] Each filter includes/excludes correctly
+- [x] Sorting stable and correct
 
 ---
 
 ## 14) Substitution Schema + Admin Endpoints
 
 ### Data Model
-- [ ] `SubstitutionGroup` (target ingredient)
-- [ ] `SubstitutionOption` (belongs to group)
-- [ ] `SubstitutionOptionIngredient` (multi-ingredient option)
+- [x] `SubstitutionGroup` (target ingredient)
+- [x] `SubstitutionOption` (belongs to group)
+- [x] `SubstitutionOptionIngredient` (multi-ingredient option)
 
 ### Admin Endpoints
-- [ ] CRUD groups/options
-- [ ] Replace option ingredient lists
+- [x] CRUD groups/options
+- [x] Replace option ingredient lists
 
 ### Tests
-- [ ] Admin can create one-to-one substitution
-- [ ] Admin can create multi-ingredient substitution option
-- [ ] Data loads correctly from DB
+- [x] Admin can create one-to-one substitution
+- [x] Admin can create multi-ingredient substitution option
+- [x] Data loads correctly from DB
 
 ---
 

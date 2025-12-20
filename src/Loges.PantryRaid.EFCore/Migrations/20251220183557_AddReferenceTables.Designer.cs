@@ -4,6 +4,7 @@ using Loges.PantryRaid.EFCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Loges.PantryRaid.EFCore.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251220183557_AddReferenceTables")]
+    partial class AddReferenceTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -611,110 +614,6 @@ namespace Loges.PantryRaid.EFCore.Migrations
                     b.ToTable("RecipeSources");
                 });
 
-            modelBuilder.Entity("Loges.PantryRaid.Models.SubstitutionGroup", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("TargetIngredientId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TargetIngredientId");
-
-                    b.ToTable("SubstitutionGroups");
-                });
-
-            modelBuilder.Entity("Loges.PantryRaid.Models.SubstitutionOption", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("SubstitutionGroupId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SubstitutionGroupId");
-
-                    b.ToTable("SubstitutionOptions");
-                });
-
-            modelBuilder.Entity("Loges.PantryRaid.Models.SubstitutionOptionIngredient", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("IngredientId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubstitutionOptionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IngredientId");
-
-                    b.HasIndex("SubstitutionOptionId");
-
-                    b.ToTable("SubstitutionOptionIngredients");
-                });
-
             modelBuilder.Entity("Loges.PantryRaid.Models.SystemNote", b =>
                 {
                     b.Property<int>("Id")
@@ -1005,47 +904,6 @@ namespace Loges.PantryRaid.EFCore.Migrations
                     b.Navigation("Recipe");
                 });
 
-            modelBuilder.Entity("Loges.PantryRaid.Models.SubstitutionGroup", b =>
-                {
-                    b.HasOne("Loges.PantryRaid.Models.Ingredient", "TargetIngredient")
-                        .WithMany()
-                        .HasForeignKey("TargetIngredientId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("TargetIngredient");
-                });
-
-            modelBuilder.Entity("Loges.PantryRaid.Models.SubstitutionOption", b =>
-                {
-                    b.HasOne("Loges.PantryRaid.Models.SubstitutionGroup", "SubstitutionGroup")
-                        .WithMany("Options")
-                        .HasForeignKey("SubstitutionGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SubstitutionGroup");
-                });
-
-            modelBuilder.Entity("Loges.PantryRaid.Models.SubstitutionOptionIngredient", b =>
-                {
-                    b.HasOne("Loges.PantryRaid.Models.Ingredient", "Ingredient")
-                        .WithMany()
-                        .HasForeignKey("IngredientId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Loges.PantryRaid.Models.SubstitutionOption", "SubstitutionOption")
-                        .WithMany("Ingredients")
-                        .HasForeignKey("SubstitutionOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ingredient");
-
-                    b.Navigation("SubstitutionOption");
-                });
-
             modelBuilder.Entity("Loges.PantryRaid.Models.UserIngredient", b =>
                 {
                     b.HasOne("Loges.PantryRaid.Models.Ingredient", "Ingredient")
@@ -1150,16 +1008,6 @@ namespace Loges.PantryRaid.EFCore.Migrations
                     b.Navigation("RecipeDietaryTags");
 
                     b.Navigation("RecipeProteins");
-                });
-
-            modelBuilder.Entity("Loges.PantryRaid.Models.SubstitutionGroup", b =>
-                {
-                    b.Navigation("Options");
-                });
-
-            modelBuilder.Entity("Loges.PantryRaid.Models.SubstitutionOption", b =>
-                {
-                    b.Navigation("Ingredients");
                 });
 #pragma warning restore 612, 618
         }

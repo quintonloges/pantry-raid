@@ -17,12 +17,50 @@ public class AppDbContext : IdentityDbContext<AppUser> {
   public DbSet<IngredientGroup> IngredientGroups { get; set; }
   public DbSet<IngredientGroupItem> IngredientGroupItems { get; set; }
   public DbSet<UserIngredient> UserIngredients { get; set; }
+  public DbSet<RecipeSource> RecipeSources { get; set; }
+  public DbSet<Recipe> Recipes { get; set; }
+  public DbSet<RecipeIngredient> RecipeIngredients { get; set; }
+  public DbSet<Cuisine> Cuisines { get; set; }
+  public DbSet<Protein> Proteins { get; set; }
+  public DbSet<DietaryTag> DietaryTags { get; set; }
+  public DbSet<RecipeCuisine> RecipeCuisines { get; set; }
+  public DbSet<RecipeProtein> RecipeProteins { get; set; }
+  public DbSet<RecipeDietaryTag> RecipeDietaryTags { get; set; }
+  public DbSet<SubstitutionGroup> SubstitutionGroups { get; set; }
+  public DbSet<SubstitutionOption> SubstitutionOptions { get; set; }
+  public DbSet<SubstitutionOptionIngredient> SubstitutionOptionIngredients { get; set; }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     base.OnModelCreating(modelBuilder);
 
     modelBuilder.Entity<UserIngredient>(entity => {
       entity.HasKey(e => new { e.UserId, e.IngredientId });
+    });
+
+    modelBuilder.Entity<RecipeSource>(entity => {
+      entity.HasIndex(e => e.Name).IsUnique();
+    });
+
+    modelBuilder.Entity<Recipe>(entity => {
+      entity.HasIndex(e => e.SourceUrl);
+      entity.HasIndex(e => new { e.RecipeSourceId, e.SourceRecipeId });
+      
+      entity.HasOne(e => e.RecipeSource)
+        .WithMany()
+        .HasForeignKey(e => e.RecipeSourceId)
+        .OnDelete(DeleteBehavior.Restrict);
+    });
+
+    modelBuilder.Entity<RecipeIngredient>(entity => {
+      entity.HasOne(e => e.Recipe)
+        .WithMany(r => r.Ingredients)
+        .HasForeignKey(e => e.RecipeId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+      entity.HasOne(e => e.Ingredient)
+        .WithMany()
+        .HasForeignKey(e => e.IngredientId)
+        .OnDelete(DeleteBehavior.SetNull);
     });
 
     modelBuilder.Entity<Ingredient>(entity => {
@@ -37,6 +75,68 @@ public class AppDbContext : IdentityDbContext<AppUser> {
           c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
           c => c.ToList()
         ));
+    });
+
+    modelBuilder.Entity<RecipeCuisine>(entity => {
+      entity.HasKey(e => new { e.RecipeId, e.CuisineId });
+      entity.HasOne(e => e.Recipe)
+        .WithMany(r => r.RecipeCuisines)
+        .HasForeignKey(e => e.RecipeId)
+        .OnDelete(DeleteBehavior.Cascade);
+      entity.HasOne(e => e.Cuisine)
+        .WithMany(c => c.RecipeCuisines)
+        .HasForeignKey(e => e.CuisineId)
+        .OnDelete(DeleteBehavior.Cascade);
+    });
+
+    modelBuilder.Entity<RecipeProtein>(entity => {
+      entity.HasKey(e => new { e.RecipeId, e.ProteinId });
+      entity.HasOne(e => e.Recipe)
+        .WithMany(r => r.RecipeProteins)
+        .HasForeignKey(e => e.RecipeId)
+        .OnDelete(DeleteBehavior.Cascade);
+      entity.HasOne(e => e.Protein)
+        .WithMany(p => p.RecipeProteins)
+        .HasForeignKey(e => e.ProteinId)
+        .OnDelete(DeleteBehavior.Cascade);
+    });
+
+    modelBuilder.Entity<RecipeDietaryTag>(entity => {
+      entity.HasKey(e => new { e.RecipeId, e.DietaryTagId });
+      entity.HasOne(e => e.Recipe)
+        .WithMany(r => r.RecipeDietaryTags)
+        .HasForeignKey(e => e.RecipeId)
+        .OnDelete(DeleteBehavior.Cascade);
+      entity.HasOne(e => e.DietaryTag)
+        .WithMany(d => d.RecipeDietaryTags)
+        .HasForeignKey(e => e.DietaryTagId)
+        .OnDelete(DeleteBehavior.Cascade);
+    });
+
+    modelBuilder.Entity<SubstitutionGroup>(entity => {
+      entity.HasOne(e => e.TargetIngredient)
+        .WithMany()
+        .HasForeignKey(e => e.TargetIngredientId)
+        .OnDelete(DeleteBehavior.Restrict);
+    });
+
+    modelBuilder.Entity<SubstitutionOption>(entity => {
+      entity.HasOne(e => e.SubstitutionGroup)
+        .WithMany(g => g.Options)
+        .HasForeignKey(e => e.SubstitutionGroupId)
+        .OnDelete(DeleteBehavior.Cascade);
+    });
+
+    modelBuilder.Entity<SubstitutionOptionIngredient>(entity => {
+      entity.HasOne(e => e.SubstitutionOption)
+        .WithMany(o => o.Ingredients)
+        .HasForeignKey(e => e.SubstitutionOptionId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+      entity.HasOne(e => e.Ingredient)
+        .WithMany()
+        .HasForeignKey(e => e.IngredientId)
+        .OnDelete(DeleteBehavior.Restrict);
     });
 
     foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes()) {
