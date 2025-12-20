@@ -13,6 +13,98 @@ public class RecipeService : IRecipeService {
     _context = context;
   }
 
+  public async Task<SearchResponseDto> SearchAsync(SearchRequestDto request) {
+    IQueryable<Recipe> query = _context.Recipes.AsQueryable();
+
+    // 1. Metadata Filters
+    if (request.Filters.ProteinId.HasValue) {
+      query = query.Where(r => r.RecipeProteins.Any(rp => rp.ProteinId == request.Filters.ProteinId.Value));
+    }
+
+    if (request.Filters.CuisineIds != null && request.Filters.CuisineIds.Any()) {
+      query = query.Where(r => r.RecipeCuisines.Any(rc => request.Filters.CuisineIds.Contains(rc.CuisineId)));
+    }
+
+    if (request.Filters.DietaryTagIds != null && request.Filters.DietaryTagIds.Any()) {
+      foreach (int tagId in request.Filters.DietaryTagIds) {
+        query = query.Where(r => r.RecipeDietaryTags.Any(rd => rd.DietaryTagId == tagId));
+      }
+    }
+
+    if (request.Filters.SourceIds != null && request.Filters.SourceIds.Any()) {
+      query = query.Where(r => request.Filters.SourceIds.Contains(r.RecipeSourceId));
+    }
+
+    if (request.Filters.MustIncludeIngredientIds != null && request.Filters.MustIncludeIngredientIds.Any()) {
+      foreach (int ingId in request.Filters.MustIncludeIngredientIds) {
+        query = query.Where(r => r.Ingredients.Any(ri => ri.IngredientId == ingId));
+      }
+    }
+
+    // 2. Missing Count Logic
+    List<int> userIngredientIds = request.IngredientIds ?? new List<int>();
+
+    // Filter in DB: Missing <= 3 (Required ingredients only)
+    query = query.Where(r => r.Ingredients
+      .Count(ri => !ri.IsOptional && (ri.IngredientId == null || !userIngredientIds.Contains(ri.IngredientId.Value))) <= 3);
+
+    // 3. Fetch Data
+    List<Recipe> candidates = await query
+      .AsNoTracking()
+      .Include(r => r.Ingredients).ThenInclude(ri => ri.Ingredient)
+      .Include(r => r.RecipeCuisines).ThenInclude(rc => rc.Cuisine)
+      .Include(r => r.RecipeProteins).ThenInclude(rp => rp.Protein)
+      .Include(r => r.RecipeDietaryTags).ThenInclude(rd => rd.DietaryTag)
+      .ToListAsync();
+
+    // 4. In-Memory Processing
+    List<IGrouping<int, RecipeMatch>> grouped = candidates
+      .Select(recipe => {
+        List<RecipeIngredient> required = recipe.Ingredients.Where(ri => !ri.IsOptional).ToList();
+        List<RecipeIngredient> missing = required
+          .Where(ri => ri.IngredientId == null || !userIngredientIds.Contains(ri.IngredientId.Value))
+          .ToList();
+        List<RecipeIngredient> have = recipe.Ingredients
+          .Where(ri => ri.IngredientId.HasValue && userIngredientIds.Contains(ri.IngredientId.Value))
+          .ToList();
+        
+        return new RecipeMatch(
+          recipe,
+          missing.Count,
+          missing.Select(ri => ri.Ingredient?.Name ?? ri.OriginalText).OrderBy(n => n).ToList(),
+          have.Select(ri => ri.Ingredient?.Name ?? ri.OriginalText).OrderBy(n => n).ToList()
+        );
+      })
+      .GroupBy(x => x.MissingCount)
+      .ToList();
+
+    List<RecipeGroupDto> results = new List<RecipeGroupDto>();
+    for (int i = 0; i <= 3; i++) {
+      IGrouping<int, RecipeMatch>? group = grouped.FirstOrDefault(g => g.Key == i);
+      List<SearchResultRecipeDto> recipeDtos = group?
+        .OrderBy(x => x.Recipe.Title)
+        .Select(x => new SearchResultRecipeDto {
+          Recipe = MapToDto(x.Recipe),
+          HaveIngredients = x.HaveIngredients,
+          MissingIngredients = x.MissingIngredients,
+          SubstitutionNotes = new List<string>()
+        })
+        .ToList() ?? new List<SearchResultRecipeDto>();
+
+      results.Add(new RecipeGroupDto {
+        MissingCount = i,
+        Recipes = recipeDtos
+      });
+    }
+
+    return new SearchResponseDto {
+      Results = results,
+      Cursor = null
+    };
+  }
+
+  private record RecipeMatch(Recipe Recipe, int MissingCount, List<string> MissingIngredients, List<string> HaveIngredients);
+
   public async Task<RecipeDto> CreateAsync(CreateRecipeDto dto) {
     Recipe recipe = new Recipe {
       Title = dto.Title,

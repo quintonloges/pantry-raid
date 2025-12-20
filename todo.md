@@ -274,39 +274,39 @@
 
 ## 12) Search API Contract (DTOs + Endpoint Shell)
 
-- [ ] Define request DTO for `POST /api/search`:
-  - [ ] ingredient_ids
-  - [ ] filters (protein, cuisines, dietary tags, must include ingredients, sources)
-  - [ ] allow_substitutions
-  - [ ] paging cursor (nullable, v1 can ignore)
-- [ ] Define response DTO:
-  - [ ] groups 0–3 missing, always present
-  - [ ] recipe metadata
-  - [ ] breakdown: have / missing / substitution notes
-  - [ ] cursor (nullable)
+- [x] Define request DTO for `POST /api/search`:
+  - [x] ingredient_ids
+  - [x] filters (protein, cuisines, dietary tags, must include ingredients, sources)
+  - [x] allow_substitutions
+  - [x] paging cursor (nullable, v1 can ignore)
+- [x] Define response DTO:
+  - [x] groups 0–3 missing, always present
+  - [x] recipe metadata
+  - [x] breakdown: have / missing / substitution notes
+  - [x] cursor (nullable)
 
 ### Tests
-- [ ] Integration test seeds DB and asserts response JSON shape (even if empty results)
-- [ ] Swagger reflects DTO schema
+- [x] Integration test seeds DB and asserts response JSON shape (even if empty results)
+- [x] Swagger reflects DTO schema
 
 ---
 
 ## 13) Search v1 Implementation (Exact Match Only)
 
-- [ ] Implement hard filters (AND logic):
-  - [ ] protein (single)
-  - [ ] cuisines (multi)
-  - [ ] dietary tags (multi)
-  - [ ] must-include ingredients (subset check)
-  - [ ] recipe sources (multi)
-- [ ] Compute coverage against required ingredients only (`is_optional == false`)
-- [ ] Exclude recipes with > 3 missing required ingredients
-- [ ] Group results by missing count (0–3)
-- [ ] Sort alphabetically by recipe title within each group
-- [ ] Return have/missing lists (substitution notes empty)
+- [x] Implement hard filters (AND logic):
+  - [x] protein (single)
+  - [x] cuisines (multi)
+  - [x] dietary tags (multi)
+  - [x] must-include ingredients (subset check)
+  - [x] recipe sources (multi)
+- [x] Compute coverage against required ingredients only (`is_optional == false`)
+- [x] Exclude recipes with > 3 missing required ingredients
+- [x] Group results by missing count (0–3)
+- [x] Sort alphabetically by recipe title within each group
+- [x] Return have/missing lists (substitution notes empty)
 
 ### Tests (Integration)
-- [ ] Exact match shows in group 0
+- [x] Exact match shows in group 0
 - [ ] 1/2/3 missing grouped correctly
 - [ ] >3 missing excluded
 - [ ] Each filter includes/excludes correctly
