@@ -13,6 +13,9 @@ public class RecipeDto {
   public int? Servings { get; set; }
   public string ScrapeStatus { get; set; } = string.Empty;
   public List<RecipeIngredientDto> Ingredients { get; set; } = new();
+  public List<CuisineDto> Cuisines { get; set; } = new();
+  public List<ProteinDto> Proteins { get; set; } = new();
+  public List<DietaryTagDto> DietaryTags { get; set; } = new();
 }
 
 public class RecipeIngredientDto {

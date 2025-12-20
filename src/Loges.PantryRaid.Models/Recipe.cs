@@ -34,5 +34,8 @@ public class Recipe : AuditedEntity {
   public string ScrapeStatus { get; set; } = "Pending";
 
   public ICollection<RecipeIngredient> Ingredients { get; set; } = new List<RecipeIngredient>();
+  public ICollection<RecipeCuisine> RecipeCuisines { get; set; } = new List<RecipeCuisine>();
+  public ICollection<RecipeProtein> RecipeProteins { get; set; } = new List<RecipeProtein>();
+  public ICollection<RecipeDietaryTag> RecipeDietaryTags { get; set; } = new List<RecipeDietaryTag>();
 }
 
