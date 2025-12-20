@@ -1,4 +1,5 @@
 using Loges.PantryRaid.Dtos;
+using Loges.PantryRaid.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Loges.PantryRaid.WebAPI.Controllers;
@@ -6,19 +7,16 @@ namespace Loges.PantryRaid.WebAPI.Controllers;
 [Route("api/search")]
 [ApiController]
 public class SearchController : ControllerBase {
+  private readonly IRecipeService _recipeService;
+
+  public SearchController(IRecipeService recipeService) {
+    _recipeService = recipeService;
+  }
+
   [HttpPost]
-  public ActionResult<SearchResponseDto> Search([FromBody] SearchRequestDto request) {
-    // Contract-first: implementation will come later.
-    // Returning empty structure to satisfy shape requirements.
-    return Ok(new SearchResponseDto {
-      Results = new List<RecipeGroupDto> {
-        new() { MissingCount = 0, Recipes = new() },
-        new() { MissingCount = 1, Recipes = new() },
-        new() { MissingCount = 2, Recipes = new() },
-        new() { MissingCount = 3, Recipes = new() }
-      },
-      Cursor = null
-    });
+  public async Task<ActionResult<SearchResponseDto>> Search([FromBody] SearchRequestDto request) {
+    SearchResponseDto result = await _recipeService.SearchAsync(request);
+    return Ok(result);
   }
 }
 

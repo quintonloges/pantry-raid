@@ -293,20 +293,20 @@
 
 ## 13) Search v1 Implementation (Exact Match Only)
 
-- [ ] Implement hard filters (AND logic):
-  - [ ] protein (single)
-  - [ ] cuisines (multi)
-  - [ ] dietary tags (multi)
-  - [ ] must-include ingredients (subset check)
-  - [ ] recipe sources (multi)
-- [ ] Compute coverage against required ingredients only (`is_optional == false`)
-- [ ] Exclude recipes with > 3 missing required ingredients
-- [ ] Group results by missing count (0–3)
-- [ ] Sort alphabetically by recipe title within each group
-- [ ] Return have/missing lists (substitution notes empty)
+- [x] Implement hard filters (AND logic):
+  - [x] protein (single)
+  - [x] cuisines (multi)
+  - [x] dietary tags (multi)
+  - [x] must-include ingredients (subset check)
+  - [x] recipe sources (multi)
+- [x] Compute coverage against required ingredients only (`is_optional == false`)
+- [x] Exclude recipes with > 3 missing required ingredients
+- [x] Group results by missing count (0–3)
+- [x] Sort alphabetically by recipe title within each group
+- [x] Return have/missing lists (substitution notes empty)
 
 ### Tests (Integration)
-- [ ] Exact match shows in group 0
+- [x] Exact match shows in group 0
 - [ ] 1/2/3 missing grouped correctly
 - [ ] >3 missing excluded
 - [ ] Each filter includes/excludes correctly
