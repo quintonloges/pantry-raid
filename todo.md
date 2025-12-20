@@ -223,52 +223,52 @@
 ## 10) Recipes + Sources + Recipe Ingredients (MVP Seed)
 
 ### Data Model
-- [ ] `RecipeSource`: id, name, base_url, scraper_key, is_active
-- [ ] `Recipe`: fields from spec (no instructions stored)
-- [ ] `RecipeIngredient`: recipe_id, ingredient_id, original_text, quantity, unit, order_index, is_optional
+- [x] `RecipeSource`: id, name, base_url, scraper_key, is_active
+- [x] `Recipe`: fields from spec (no instructions stored)
+- [x] `RecipeIngredient`: recipe_id, ingredient_id, original_text, quantity, unit, order_index, is_optional
 
 ### Constraints / Indexes
-- [ ] Index on `Recipe.source_url` (unique or effectively unique)
-- [ ] Index on (`recipe_source_id`, `source_recipe_id`) if used
-- [ ] Enforce soft delete
+- [x] Index on `Recipe.source_url` (unique or effectively unique)
+- [x] Index on (`recipe_source_id`, `source_recipe_id`) if used
+- [x] Enforce soft delete
 
 ### Endpoints
-- [ ] Admin:
-  - [ ] `POST /api/admin/recipe-sources`
-  - [ ] `POST /api/admin/recipes` (includes ingredient lines)
-- [ ] Public:
-  - [ ] `GET /api/reference/sources`
+- [x] Admin:
+  - [x] `POST /api/admin/recipe-sources`
+  - [x] `POST /api/admin/recipes` (includes ingredient lines)
+- [x] Public:
+  - [x] `GET /api/reference/sources`
 
 ### Tests
-- [ ] Admin can create source + recipe + ingredients
-- [ ] Public sees sources
-- [ ] Confirm no “instructions” storage exists in schema/contracts
+- [x] Admin can create source + recipe + ingredients
+- [x] Public sees sources
+- [x] Confirm no “instructions” storage exists in schema/contracts
 
 ---
 
 ## 11) Filter Metadata (Cuisine / Protein / Dietary Tags)
 
 ### Data Model
-- [ ] `Cuisine`, `Protein`, `DietaryTag`
-- [ ] Join tables:
-  - [ ] `recipe_cuisine`
-  - [ ] `recipe_protein`
-  - [ ] `recipe_dietary_tag`
+- [x] `Cuisine`, `Protein`, `DietaryTag`
+- [x] Join tables:
+  - [x] `recipe_cuisine`
+  - [x] `recipe_protein`
+  - [x] `recipe_dietary_tag`
 
 ### Endpoints
-- [ ] Public:
-  - [ ] `GET /api/reference/cuisines`
-  - [ ] `GET /api/reference/proteins`
-  - [ ] `GET /api/reference/dietary-tags`
-- [ ] Admin:
-  - [ ] CRUD each list
-  - [ ] Replace assignments for recipe tags (idempotent)
+- [x] Public:
+  - [x] `GET /api/reference/cuisines`
+  - [x] `GET /api/reference/proteins`
+  - [x] `GET /api/reference/dietary-tags`
+- [x] Admin:
+  - [x] CRUD each list
+  - [x] Replace assignments for recipe tags (idempotent)
 
 ### Tests
-- [ ] Admin creates tags
-- [ ] Admin assigns tags to recipe
-- [ ] Public lists tags
-- [ ] Assignments persist
+- [x] Admin creates tags
+- [x] Admin assigns tags to recipe
+- [x] Public lists tags
+- [x] Assignments persist
 
 ---
 

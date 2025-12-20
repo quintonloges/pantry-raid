@@ -20,5 +20,15 @@ public class AdminRecipeController : ControllerBase {
     RecipeDto result = await _service.CreateAsync(dto);
     return CreatedAtAction(nameof(Create), new { id = result.Id }, result);
   }
+
+  [HttpPut("{id}/tags")]
+  public async Task<IActionResult> SetTags(int id, SetRecipeTagsDto dto) {
+    try {
+      await _service.SetTagsAsync(id, dto);
+      return NoContent();
+    } catch (ArgumentException) {
+      return NotFound();
+    }
+  }
 }
 

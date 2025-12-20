@@ -45,6 +45,50 @@ public class RecipeService : IRecipeService {
     return MapToDto(recipe);
   }
 
+  public async Task<RecipeDto?> GetByIdAsync(int id) {
+    Recipe? recipe = await _context.Recipes
+      .Include(r => r.Ingredients)
+      .Include(r => r.RecipeCuisines).ThenInclude(rc => rc.Cuisine)
+      .Include(r => r.RecipeProteins).ThenInclude(rp => rp.Protein)
+      .Include(r => r.RecipeDietaryTags).ThenInclude(rd => rd.DietaryTag)
+      .FirstOrDefaultAsync(r => r.Id == id);
+      
+    if (recipe == null) {
+      return null;
+    }
+    return MapToDto(recipe);
+  }
+
+  public async Task SetTagsAsync(int recipeId, SetRecipeTagsDto dto) {
+    Recipe? recipe = await _context.Recipes
+      .Include(r => r.RecipeCuisines)
+      .Include(r => r.RecipeProteins)
+      .Include(r => r.RecipeDietaryTags)
+      .FirstOrDefaultAsync(r => r.Id == recipeId);
+
+    if (recipe == null) {
+      throw new ArgumentException("Recipe not found", nameof(recipeId));
+    }
+
+    // Clear existing
+    _context.RecipeCuisines.RemoveRange(recipe.RecipeCuisines);
+    _context.RecipeProteins.RemoveRange(recipe.RecipeProteins);
+    _context.RecipeDietaryTags.RemoveRange(recipe.RecipeDietaryTags);
+
+    // Add new
+    foreach (int id in dto.CuisineIds.Distinct()) {
+      _context.RecipeCuisines.Add(new RecipeCuisine { RecipeId = recipeId, CuisineId = id });
+    }
+    foreach (int id in dto.ProteinIds.Distinct()) {
+      _context.RecipeProteins.Add(new RecipeProtein { RecipeId = recipeId, ProteinId = id });
+    }
+    foreach (int id in dto.DietaryTagIds.Distinct()) {
+      _context.RecipeDietaryTags.Add(new RecipeDietaryTag { RecipeId = recipeId, DietaryTagId = id });
+    }
+
+    await _context.SaveChangesAsync();
+  }
+
   private static RecipeDto MapToDto(Recipe recipe) {
     return new RecipeDto {
       Id = recipe.Id,
@@ -63,8 +107,10 @@ public class RecipeService : IRecipeService {
         Quantity = i.Quantity,
         Unit = i.Unit,
         IsOptional = i.IsOptional
-      }).ToList()
+      }).ToList(),
+      Cuisines = recipe.RecipeCuisines.Select(rc => new CuisineDto { Id = rc.Cuisine.Id, Name = rc.Cuisine.Name }).ToList(),
+      Proteins = recipe.RecipeProteins.Select(rp => new ProteinDto { Id = rp.Protein.Id, Name = rp.Protein.Name }).ToList(),
+      DietaryTags = recipe.RecipeDietaryTags.Select(rd => new DietaryTagDto { Id = rd.DietaryTag.Id, Name = rd.DietaryTag.Name }).ToList()
     };
   }
 }
-
