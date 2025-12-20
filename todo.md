@@ -201,22 +201,22 @@
 ## 9) User Ingredients (Pantry)
 
 ### Data Model
-- [ ] `UserIngredient` join table:
-  - [ ] user_id
-  - [ ] ingredient_id
-  - [ ] composite unique index
+- [x] `UserIngredient` join table:
+  - [x] user_id
+  - [x] ingredient_id
+  - [x] composite unique index
 
 ### Endpoints (Auth Required)
-- [ ] `GET /api/user/ingredients`
-- [ ] `PUT /api/user/ingredients` (bulk replace ingredient_ids)
-  - [ ] Enforce max 100
-  - [ ] Remove duplicates
-  - [ ] Transactional, idempotent
+- [x] `GET /api/user/ingredients`
+- [x] `PUT /api/user/ingredients` (bulk replace ingredient_ids)
+  - [x] Enforce max 100
+  - [x] Remove duplicates
+  - [x] Transactional, idempotent
 
 ### Tests
-- [ ] PUT stores exact set
-- [ ] >100 returns 400 with clear message
-- [ ] GET returns sorted by ingredient name
+- [x] PUT stores exact set
+- [x] >100 returns 400 with clear message
+- [x] GET returns sorted by ingredient name
 
 ---
 
