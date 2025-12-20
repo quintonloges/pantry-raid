@@ -8,9 +8,16 @@ namespace Loges.PantryRaid.WebAPI.Controllers;
 [ApiController]
 public class ReferenceController : ControllerBase {
   private readonly IReferenceService _service;
+  private readonly IRecipeSourceService _sourceService;
 
-  public ReferenceController(IReferenceService service) {
+  public ReferenceController(IReferenceService service, IRecipeSourceService sourceService) {
     _service = service;
+    _sourceService = sourceService;
+  }
+
+  [HttpGet("sources")]
+  public async Task<ActionResult<List<RecipeSourceDto>>> GetSources() {
+    return await _sourceService.GetAllAsync();
   }
 
   [HttpGet("ingredients")]

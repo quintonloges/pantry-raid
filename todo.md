@@ -274,20 +274,20 @@
 
 ## 12) Search API Contract (DTOs + Endpoint Shell)
 
-- [ ] Define request DTO for `POST /api/search`:
-  - [ ] ingredient_ids
-  - [ ] filters (protein, cuisines, dietary tags, must include ingredients, sources)
-  - [ ] allow_substitutions
-  - [ ] paging cursor (nullable, v1 can ignore)
-- [ ] Define response DTO:
-  - [ ] groups 0–3 missing, always present
-  - [ ] recipe metadata
-  - [ ] breakdown: have / missing / substitution notes
-  - [ ] cursor (nullable)
+- [x] Define request DTO for `POST /api/search`:
+  - [x] ingredient_ids
+  - [x] filters (protein, cuisines, dietary tags, must include ingredients, sources)
+  - [x] allow_substitutions
+  - [x] paging cursor (nullable, v1 can ignore)
+- [x] Define response DTO:
+  - [x] groups 0–3 missing, always present
+  - [x] recipe metadata
+  - [x] breakdown: have / missing / substitution notes
+  - [x] cursor (nullable)
 
 ### Tests
-- [ ] Integration test seeds DB and asserts response JSON shape (even if empty results)
-- [ ] Swagger reflects DTO schema
+- [x] Integration test seeds DB and asserts response JSON shape (even if empty results)
+- [x] Swagger reflects DTO schema
 
 ---
 
