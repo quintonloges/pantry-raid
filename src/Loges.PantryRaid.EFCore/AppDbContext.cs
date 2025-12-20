@@ -17,12 +17,41 @@ public class AppDbContext : IdentityDbContext<AppUser> {
   public DbSet<IngredientGroup> IngredientGroups { get; set; }
   public DbSet<IngredientGroupItem> IngredientGroupItems { get; set; }
   public DbSet<UserIngredient> UserIngredients { get; set; }
+  public DbSet<RecipeSource> RecipeSources { get; set; }
+  public DbSet<Recipe> Recipes { get; set; }
+  public DbSet<RecipeIngredient> RecipeIngredients { get; set; }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     base.OnModelCreating(modelBuilder);
 
     modelBuilder.Entity<UserIngredient>(entity => {
       entity.HasKey(e => new { e.UserId, e.IngredientId });
+    });
+
+    modelBuilder.Entity<RecipeSource>(entity => {
+      entity.HasIndex(e => e.Name).IsUnique();
+    });
+
+    modelBuilder.Entity<Recipe>(entity => {
+      entity.HasIndex(e => e.SourceUrl);
+      entity.HasIndex(e => new { e.RecipeSourceId, e.SourceRecipeId });
+      
+      entity.HasOne(e => e.RecipeSource)
+        .WithMany()
+        .HasForeignKey(e => e.RecipeSourceId)
+        .OnDelete(DeleteBehavior.Restrict);
+    });
+
+    modelBuilder.Entity<RecipeIngredient>(entity => {
+      entity.HasOne(e => e.Recipe)
+        .WithMany(r => r.Ingredients)
+        .HasForeignKey(e => e.RecipeId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+      entity.HasOne(e => e.Ingredient)
+        .WithMany()
+        .HasForeignKey(e => e.IngredientId)
+        .OnDelete(DeleteBehavior.SetNull);
     });
 
     modelBuilder.Entity<Ingredient>(entity => {

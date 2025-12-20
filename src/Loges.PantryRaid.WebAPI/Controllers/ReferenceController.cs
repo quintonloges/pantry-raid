@@ -12,10 +12,17 @@ namespace Loges.PantryRaid.WebAPI.Controllers;
 public class ReferenceController : ControllerBase {
   private readonly AppDbContext _context;
   private readonly IIngredientGroupService _ingredientGroupService;
+  private readonly IRecipeSourceService _recipeSourceService;
 
-  public ReferenceController(AppDbContext context, IIngredientGroupService ingredientGroupService) {
+  public ReferenceController(AppDbContext context, IIngredientGroupService ingredientGroupService, IRecipeSourceService recipeSourceService) {
     _context = context;
     _ingredientGroupService = ingredientGroupService;
+    _recipeSourceService = recipeSourceService;
+  }
+
+  [HttpGet("sources")]
+  public async Task<ActionResult<IEnumerable<RecipeSourceDto>>> GetRecipeSources() {
+    return Ok(await _recipeSourceService.GetAllAsync());
   }
 
   [HttpGet("ingredient-groups")]
