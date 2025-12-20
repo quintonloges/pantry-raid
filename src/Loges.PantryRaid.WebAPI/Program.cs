@@ -24,6 +24,7 @@ builder.Services.AddScoped<IUserIngredientService, UserIngredientService>();
 builder.Services.AddScoped<IRecipeSourceService, RecipeSourceService>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 builder.Services.AddScoped<IReferenceService, ReferenceService>();
+builder.Services.AddScoped<ISubstitutionService, SubstitutionService>();
 
 // Configure NSwag with JWT support
 builder.Services.AddOpenApiDocument(config => {

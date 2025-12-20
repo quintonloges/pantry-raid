@@ -26,6 +26,9 @@ public class AppDbContext : IdentityDbContext<AppUser> {
   public DbSet<RecipeCuisine> RecipeCuisines { get; set; }
   public DbSet<RecipeProtein> RecipeProteins { get; set; }
   public DbSet<RecipeDietaryTag> RecipeDietaryTags { get; set; }
+  public DbSet<SubstitutionGroup> SubstitutionGroups { get; set; }
+  public DbSet<SubstitutionOption> SubstitutionOptions { get; set; }
+  public DbSet<SubstitutionOptionIngredient> SubstitutionOptionIngredients { get; set; }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     base.OnModelCreating(modelBuilder);
@@ -108,6 +111,32 @@ public class AppDbContext : IdentityDbContext<AppUser> {
         .WithMany(d => d.RecipeDietaryTags)
         .HasForeignKey(e => e.DietaryTagId)
         .OnDelete(DeleteBehavior.Cascade);
+    });
+
+    modelBuilder.Entity<SubstitutionGroup>(entity => {
+      entity.HasOne(e => e.TargetIngredient)
+        .WithMany()
+        .HasForeignKey(e => e.TargetIngredientId)
+        .OnDelete(DeleteBehavior.Restrict);
+    });
+
+    modelBuilder.Entity<SubstitutionOption>(entity => {
+      entity.HasOne(e => e.SubstitutionGroup)
+        .WithMany(g => g.Options)
+        .HasForeignKey(e => e.SubstitutionGroupId)
+        .OnDelete(DeleteBehavior.Cascade);
+    });
+
+    modelBuilder.Entity<SubstitutionOptionIngredient>(entity => {
+      entity.HasOne(e => e.SubstitutionOption)
+        .WithMany(o => o.Ingredients)
+        .HasForeignKey(e => e.SubstitutionOptionId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+      entity.HasOne(e => e.Ingredient)
+        .WithMany()
+        .HasForeignKey(e => e.IngredientId)
+        .OnDelete(DeleteBehavior.Restrict);
     });
 
     foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes()) {
