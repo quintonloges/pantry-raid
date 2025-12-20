@@ -307,28 +307,28 @@
 
 ### Tests (Integration)
 - [x] Exact match shows in group 0
-- [ ] 1/2/3 missing grouped correctly
-- [ ] >3 missing excluded
-- [ ] Each filter includes/excludes correctly
-- [ ] Sorting stable and correct
+- [x] 1/2/3 missing grouped correctly
+- [x] >3 missing excluded
+- [x] Each filter includes/excludes correctly
+- [x] Sorting stable and correct
 
 ---
 
 ## 14) Substitution Schema + Admin Endpoints
 
 ### Data Model
-- [ ] `SubstitutionGroup` (target ingredient)
-- [ ] `SubstitutionOption` (belongs to group)
-- [ ] `SubstitutionOptionIngredient` (multi-ingredient option)
+- [x] `SubstitutionGroup` (target ingredient)
+- [x] `SubstitutionOption` (belongs to group)
+- [x] `SubstitutionOptionIngredient` (multi-ingredient option)
 
 ### Admin Endpoints
-- [ ] CRUD groups/options
-- [ ] Replace option ingredient lists
+- [x] CRUD groups/options
+- [x] Replace option ingredient lists
 
 ### Tests
-- [ ] Admin can create one-to-one substitution
-- [ ] Admin can create multi-ingredient substitution option
-- [ ] Data loads correctly from DB
+- [x] Admin can create one-to-one substitution
+- [x] Admin can create multi-ingredient substitution option
+- [x] Data loads correctly from DB
 
 ---
 

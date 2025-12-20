@@ -174,6 +174,6 @@ public class SearchTests : IClassFixture<PantryRaidWebApplicationFactory> {
   }
 
   private class LoginResult {
-      public string? Token { get; set; }
+    public string? Token { get; set; }
   }
 }
