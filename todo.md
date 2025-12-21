@@ -334,34 +334,34 @@
 
 ## 15) Substitution Engine (Pure Logic + Unit Tests)
 
-- [ ] Implement substitution engine service (no EF inside)
-- [ ] Supports:
-  - [ ] one-to-one substitutions
-  - [ ] multi-ingredient substitutions
-  - [ ] chaining with cycle detection
-  - [ ] deterministic selection when multiple options exist
+- [x] Implement substitution engine service (no EF inside)
+- [x] Supports:
+  - [x] one-to-one substitutions
+  - [x] multi-ingredient substitutions
+  - [x] chaining with cycle detection
+  - [x] deterministic selection when multiple options exist
 
 ### Unit Tests
-- [ ] one-to-one
-- [ ] multi-ingredient
-- [ ] chaining
-- [ ] cycle detection (A→B→A)
-- [ ] deterministic option selection
+- [x] one-to-one
+- [x] multi-ingredient
+- [x] chaining
+- [x] cycle detection (A→B→A)
+- [x] deterministic option selection
 
 ---
 
 ## 16) Integrate Substitutions into Search (allow_substitutions)
 
-- [ ] If allow_substitutions=true:
-  - [ ] Treat substituted requirements as satisfied
-  - [ ] Update missing count logic accordingly
-  - [ ] Populate substitution notes: `* Substitute with <ingredient>` or `* Substitute with <ingredient> + <ingredient>`
-- [ ] Ensure transparency: show which ingredients are missing vs substituted
+- [x] If allow_substitutions=true:
+  - [x] Treat substituted requirements as satisfied
+  - [x] Update missing count logic accordingly
+  - [x] Populate substitution notes: `* Substitute with <ingredient>` or `* Substitute with <ingredient> + <ingredient>`
+- [x] Ensure transparency: show which ingredients are missing vs substituted
 
 ### Tests (Integration)
-- [ ] Recipe moves groups when substitutions enabled
-- [ ] Cycle does not crash; stable output
-- [ ] Substitution notes match expected format
+- [x] Recipe moves groups when substitutions enabled
+- [x] Cycle does not crash; stable output
+- [x] Substitution notes match expected format
 
 ---
 

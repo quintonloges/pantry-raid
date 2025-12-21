@@ -173,6 +173,127 @@ public class SearchTests : IClassFixture<PantryRaidWebApplicationFactory> {
     Assert.DoesNotContain(allRecipes4, r => r.Recipe.Title == "Bread");
   }
 
+  private async Task<int> CreateSubstitutionGroupAsync(int targetIngredientId) {
+    HttpResponseMessage response = await _client.PostAsJsonAsync("/api/admin/substitutions/groups", new CreateSubstitutionGroupRequest {
+      TargetIngredientId = targetIngredientId
+    });
+    response.EnsureSuccessStatusCode();
+    SubstitutionGroupDto? group = await response.Content.ReadFromJsonAsync<SubstitutionGroupDto>();
+    return group!.Id;
+  }
+
+  private async Task CreateSubstitutionOptionAsync(int groupId, List<int> ingredientIds, string note = "") {
+    HttpResponseMessage response = await _client.PostAsJsonAsync($"/api/admin/substitutions/groups/{groupId}/options", new CreateSubstitutionOptionRequest {
+      SubstitutionGroupId = groupId,
+      Note = note,
+      IngredientIds = ingredientIds
+    });
+    response.EnsureSuccessStatusCode();
+  }
+
+  [Fact]
+  public async Task Search_Substitutions_Works_Correctly() {
+    await AuthenticateAsAdminAsync();
+
+    // 1. Setup Data
+    int flourId = await CreateIngredientAsync($"Flour_{Guid.NewGuid()}");
+    int eggId = await CreateIngredientAsync($"Egg_{Guid.NewGuid()}");
+    int milkId = await CreateIngredientAsync($"Milk_{Guid.NewGuid()}");
+    int buttermilkId = await CreateIngredientAsync($"Buttermilk_{Guid.NewGuid()}");
+    int vinegarId = await CreateIngredientAsync($"Vinegar_{Guid.NewGuid()}");
+    
+    int sourceId = await CreateSourceAsync();
+
+    // Recipe: Pancakes with Buttermilk (Required)
+    // Ingredients: Flour, Egg, Buttermilk
+    await CreateRecipeAsync(sourceId, "Buttermilk Pancakes", new List<(int, bool)> { 
+      (flourId, false), (eggId, false), (buttermilkId, false) 
+    });
+
+    // Substitution Rule: Buttermilk -> Milk + Vinegar
+    int groupId = await CreateSubstitutionGroupAsync(buttermilkId);
+    await CreateSubstitutionOptionAsync(groupId, new List<int> { milkId, vinegarId }, "Homemade");
+
+    HttpClient publicClient = _factory.CreateClient();
+
+    // User has: Flour, Egg, Milk, Vinegar. Missing Buttermilk.
+    // Without substitutions: Missing 1 (Buttermilk) -> Group 1.
+    // With substitutions: Missing 0 (Satisfied by Milk+Vinegar) -> Group 0.
+
+    List<int> userIngredients = new List<int> { flourId, eggId, milkId, vinegarId };
+
+    // 1. Without Substitutions
+    SearchRequestDto requestNoSub = new SearchRequestDto {
+      IngredientIds = userIngredients,
+      AllowSubstitutions = false
+    };
+    SearchResponseDto? resultNoSub = await (await publicClient.PostAsJsonAsync("/api/search", requestNoSub)).Content.ReadFromJsonAsync<SearchResponseDto>();
+
+    RecipeGroupDto group1_NoSub = resultNoSub!.Results.First(g => g.MissingCount == 1);
+    Assert.Contains(group1_NoSub.Recipes, r => r.Recipe.Title == "Buttermilk Pancakes");
+    
+    // Verify it's NOT in group 0
+    RecipeGroupDto group0_NoSub = resultNoSub.Results.First(g => g.MissingCount == 0);
+    Assert.DoesNotContain(group0_NoSub.Recipes, r => r.Recipe.Title == "Buttermilk Pancakes");
+
+    // 2. With Substitutions
+    SearchRequestDto requestSub = new SearchRequestDto {
+      IngredientIds = userIngredients,
+      AllowSubstitutions = true
+    };
+    SearchResponseDto? resultSub = await (await publicClient.PostAsJsonAsync("/api/search", requestSub)).Content.ReadFromJsonAsync<SearchResponseDto>();
+
+    RecipeGroupDto group0_Sub = resultSub!.Results.First(g => g.MissingCount == 0);
+    Assert.Contains(group0_Sub.Recipes, r => r.Recipe.Title == "Buttermilk Pancakes");
+    
+    SearchResultRecipeDto? recipe = group0_Sub.Recipes.First(r => r.Recipe.Title == "Buttermilk Pancakes");
+    Assert.NotEmpty(recipe.SubstitutionNotes);
+    Assert.Contains("Substitute", recipe.SubstitutionNotes.First());
+    // Note: The note text format depends on ingredient names.
+    // We didn't capture the exact names for Milk/Vinegar in variables but we know them.
+    // But "Homemade" note should be there.
+    Assert.Contains("Homemade", recipe.SubstitutionNotes.First());
+  }
+
+  [Fact]
+  public async Task Search_SubstitutionCycles_DoNotCrash() {
+    await AuthenticateAsAdminAsync();
+
+    // 1. Setup Data
+    int ingAId = await CreateIngredientAsync($"A_{Guid.NewGuid()}");
+    int ingBId = await CreateIngredientAsync($"B_{Guid.NewGuid()}");
+    int sourceId = await CreateSourceAsync();
+
+    // Recipe needs A
+    await CreateRecipeAsync(sourceId, "Cycle Recipe", new List<(int, bool)> { (ingAId, false) });
+
+    // Rules: A -> B, B -> A
+    int groupA = await CreateSubstitutionGroupAsync(ingAId);
+    await CreateSubstitutionOptionAsync(groupA, new List<int> { ingBId }, "Use B");
+
+    int groupB = await CreateSubstitutionGroupAsync(ingBId);
+    await CreateSubstitutionOptionAsync(groupB, new List<int> { ingAId }, "Use A");
+
+    HttpClient publicClient = _factory.CreateClient();
+
+    // User has nothing. 
+    // Logic: Need A. Try sub A -> B. Need B. Try sub B -> A. Need A. Cycle detected.
+    // Should fail gracefully and return missing A.
+
+    SearchRequestDto request = new SearchRequestDto {
+      IngredientIds = new List<int>(), // Empty
+      AllowSubstitutions = true
+    };
+
+    // The test passes if this call completes without timeout/stack overflow
+    SearchResponseDto? result = await (await publicClient.PostAsJsonAsync("/api/search", request)).Content.ReadFromJsonAsync<SearchResponseDto>();
+
+    Assert.NotNull(result);
+    // Recipe has 1 ingredient, missing. So missing count 1.
+    RecipeGroupDto group1 = result.Results.First(g => g.MissingCount == 1);
+    Assert.Contains(group1.Recipes, r => r.Recipe.Title == "Cycle Recipe");
+  }
+
   private class LoginResult {
     public string? Token { get; set; }
   }
