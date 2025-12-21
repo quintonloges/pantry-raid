@@ -8,9 +8,16 @@ namespace Loges.PantryRaid.Services;
 
 public class RecipeService : IRecipeService {
   private readonly AppDbContext _context;
+  private readonly ISubstitutionEvaluator _substitutionEvaluator;
+  private readonly ISubstitutionService _substitutionService;
 
-  public RecipeService(AppDbContext context) {
+  public RecipeService(
+    AppDbContext context,
+    ISubstitutionEvaluator substitutionEvaluator,
+    ISubstitutionService substitutionService) {
     _context = context;
+    _substitutionEvaluator = substitutionEvaluator;
+    _substitutionService = substitutionService;
   }
 
   public async Task<SearchResponseDto> SearchAsync(SearchRequestDto request) {
@@ -58,21 +65,100 @@ public class RecipeService : IRecipeService {
       .ToListAsync();
 
     // 4. In-Memory Processing
+    IEnumerable<SubstitutionGroupDto> substitutionRules = Enumerable.Empty<SubstitutionGroupDto>();
+    if (request.AllowSubstitutions) {
+      substitutionRules = await _substitutionService.GetAllGroupsAsync();
+    }
+
     List<IGrouping<int, RecipeMatch>> grouped = candidates
       .Select(recipe => {
         List<RecipeIngredient> required = recipe.Ingredients.Where(ri => !ri.IsOptional).ToList();
+        
         List<RecipeIngredient> missing = required
           .Where(ri => ri.IngredientId == null || !userIngredientIds.Contains(ri.IngredientId.Value))
           .ToList();
+        
         List<RecipeIngredient> have = recipe.Ingredients
           .Where(ri => ri.IngredientId.HasValue && userIngredientIds.Contains(ri.IngredientId.Value))
           .ToList();
+
+        List<string> substitutionNotes = new List<string>();
+        int missingCount = missing.Count;
+
+        if (request.AllowSubstitutions && missingCount > 0 && substitutionRules.Any()) {
+          // Get IDs of missing ingredients that are mappable (have an IngredientId)
+          List<int> missingIds = missing
+            .Where(ri => ri.IngredientId.HasValue)
+            .Select(ri => ri.IngredientId!.Value)
+            .ToList();
+
+          if (missingIds.Any()) {
+            EvaluationResult evalResult = _substitutionEvaluator.Evaluate(missingIds, userIngredientIds, substitutionRules);
+            
+            // Identify which were satisfied by substitution
+            List<KeyValuePair<int, IngredientMatch>> substitutedMatches = evalResult.Matches
+              .Where(m => m.Value.Type == IngredientMatchType.Substitution)
+              .ToList();
+
+            // Recalculate missing based on evaluation result
+            // The evaluator tells us exactly what is still missing from the set we gave it
+            int satisfiedCount = evalResult.Matches.Count; // Exact + Substitution
+            
+            // Note: The evaluator returns matches for Exact (already filtered out above? No.)
+            // Wait, I passed `missingIds` to Evaluate. So any "Exact" match returned by Evaluate
+            // implies I actually had it but thought it was missing?
+            // `missing` list above is filtered by `!userIngredientIds.Contains`.
+            // So `Evaluate` should NOT return Exact matches unless there's a bug or I passed something I have.
+            // Assuming `Evaluate` only finds Substitutions for these inputs.
+            
+            missingCount -= substitutedMatches.Count;
+
+            // Collect notes
+            foreach (var match in substitutedMatches) {
+              RecipeIngredient? targetRi = missing.FirstOrDefault(ri => ri.IngredientId == match.Key);
+              if (targetRi == null){
+                continue;
+              }
+
+              string targetName = targetRi.Ingredient?.Name ?? "Unknown";
+              
+              // Format note
+              // Need to traverse the path to build a readable string?
+              // The spec says: "* Substitute with <ingredient>"
+              // The evaluator returns a SubstitutionPath.
+              // Let's format it simply: "Substitute [Target] with [Source1, Source2...]"
+              
+              if (match.Value.Substitution != null) {
+                SubstitutionPath path = match.Value.Substitution;
+                SubstitutionGroupDto? group = substitutionRules.FirstOrDefault(g => g.TargetIngredientId == match.Key);
+                SubstitutionOptionDto? option = group?.Options.FirstOrDefault(o => o.Id == path.OptionId);
+
+                if (option != null) {
+                  List<string> sourceNames = option.Ingredients
+                    .Select(i => i.IngredientName)
+                    .ToList();
+
+                  string sourcesStr = string.Join(", ", sourceNames);
+                  string note = $"Substitute {targetName} with {sourcesStr}";
+                  if (!string.IsNullOrEmpty(path.Note)) {
+                    note += $" ({path.Note})";
+                  }
+                  substitutionNotes.Add(note);
+                  
+                  // Remove from missing list so it doesn't appear in "Missing Ingredients"
+                  missing.Remove(targetRi);
+                }
+              }
+            }
+          }
+        }
         
         return new RecipeMatch(
           recipe,
           missing.Count,
           missing.Select(ri => ri.Ingredient?.Name ?? ri.OriginalText).OrderBy(n => n).ToList(),
-          have.Select(ri => ri.Ingredient?.Name ?? ri.OriginalText).OrderBy(n => n).ToList()
+          have.Select(ri => ri.Ingredient?.Name ?? ri.OriginalText).OrderBy(n => n).ToList(),
+          substitutionNotes
         );
       })
       .GroupBy(x => x.MissingCount)
@@ -87,7 +173,7 @@ public class RecipeService : IRecipeService {
           Recipe = MapToDto(x.Recipe),
           HaveIngredients = x.HaveIngredients,
           MissingIngredients = x.MissingIngredients,
-          SubstitutionNotes = new List<string>()
+          SubstitutionNotes = x.SubstitutionNotes
         })
         .ToList() ?? new List<SearchResultRecipeDto>();
 
@@ -103,7 +189,7 @@ public class RecipeService : IRecipeService {
     };
   }
 
-  private record RecipeMatch(Recipe Recipe, int MissingCount, List<string> MissingIngredients, List<string> HaveIngredients);
+  private record RecipeMatch(Recipe Recipe, int MissingCount, List<string> MissingIngredients, List<string> HaveIngredients, List<string> SubstitutionNotes);
 
   public async Task<RecipeDto> CreateAsync(CreateRecipeDto dto) {
     Recipe recipe = new Recipe {
