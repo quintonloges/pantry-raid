@@ -29,6 +29,7 @@ public class AppDbContext : IdentityDbContext<AppUser> {
   public DbSet<SubstitutionGroup> SubstitutionGroups { get; set; }
   public DbSet<SubstitutionOption> SubstitutionOptions { get; set; }
   public DbSet<SubstitutionOptionIngredient> SubstitutionOptionIngredients { get; set; }
+  public DbSet<UnmappedIngredient> UnmappedIngredients { get; set; }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     base.OnModelCreating(modelBuilder);
@@ -136,6 +137,31 @@ public class AppDbContext : IdentityDbContext<AppUser> {
       entity.HasOne(e => e.Ingredient)
         .WithMany()
         .HasForeignKey(e => e.IngredientId)
+        .OnDelete(DeleteBehavior.Restrict);
+    });
+
+    modelBuilder.Entity<UnmappedIngredient>(entity => {
+      entity.Property(e => e.Status)
+        .HasConversion<string>();
+
+      entity.HasOne(e => e.Recipe)
+        .WithMany()
+        .HasForeignKey(e => e.RecipeId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+      entity.HasOne(e => e.RecipeSource)
+        .WithMany()
+        .HasForeignKey(e => e.RecipeSourceId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+      entity.HasOne(e => e.SuggestedIngredient)
+        .WithMany()
+        .HasForeignKey(e => e.SuggestedIngredientId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+      entity.HasOne(e => e.ResolvedIngredient)
+        .WithMany()
+        .HasForeignKey(e => e.ResolvedIngredientId)
         .OnDelete(DeleteBehavior.Restrict);
     });
 
