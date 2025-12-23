@@ -3,6 +3,8 @@ using Loges.PantryRaid.Models;
 using Loges.PantryRaid.Services.Interfaces;
 using Loges.PantryRaid.Services;
 using Loges.PantryRaid.Services.Interceptors;
+using Loges.PantryRaid.Services.Scraping;
+using Loges.PantryRaid.Services.Scraping.Impl;
 using Loges.PantryRaid.WebAPI.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -27,6 +29,8 @@ builder.Services.AddScoped<IReferenceService, ReferenceService>();
 builder.Services.AddScoped<ISubstitutionService, SubstitutionService>();
 builder.Services.AddScoped<ISubstitutionEvaluator, SubstitutionEvaluator>();
 builder.Services.AddScoped<IUnmappedIngredientService, UnmappedIngredientService>();
+builder.Services.AddScoped<IScraper, StubScraper>();
+builder.Services.AddScoped<IScrapingService, ScrapingService>();
 
 // Configure NSwag with JWT support
 builder.Services.AddOpenApiDocument(config => {
