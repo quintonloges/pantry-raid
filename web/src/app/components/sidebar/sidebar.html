@@ -1,0 +1,54 @@
+<div class="sidebar-container">
+  <div class="add-ingredient-section">
+    <mat-form-field class="full-width">
+      <mat-label>Add ingredients</mat-label>
+      <input
+        #ingredientInput
+        type="text"
+        placeholder="Type an ingredient..."
+        aria-label="Ingredient"
+        matInput
+        [formControl]="ingredientCtrl"
+        [matAutocomplete]="auto">
+      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+        <mat-option *ngFor="let ingredient of filteredIngredients | async" [value]="ingredient">
+          {{ingredient.name}}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+
+  <div class="current-list-section" *ngIf="(selectedIngredients$ | async)?.length; else emptyState">
+    <div class="list-header">
+      <h3>Your Pantry</h3>
+      <button mat-button color="warn" (click)="clearAll()">Clear All</button>
+    </div>
+    <mat-chip-set>
+      <mat-chip
+        *ngFor="let ingredient of selectedIngredients$ | async"
+        (removed)="remove(ingredient)">
+        {{ingredient.name}}
+        <button matChipRemove [attr.aria-label]="'remove ' + ingredient.name">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip>
+    </mat-chip-set>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="groups-section">
+      <h3>Quick Add Groups</h3>
+      <div class="group-cards">
+        <mat-card *ngFor="let group of ingredientGroups$ | async" (click)="addGroup(group)" class="group-card">
+            <mat-card-header>
+                <mat-card-title>{{group.name}}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <p>{{group.description}}</p>
+            </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </ng-template>
+</div>
+

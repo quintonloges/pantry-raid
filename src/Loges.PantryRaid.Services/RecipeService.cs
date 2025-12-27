@@ -59,6 +59,7 @@ public class RecipeService : IRecipeService {
     List<Recipe> candidates = await query
       .AsNoTracking()
       .Include(r => r.Ingredients).ThenInclude(ri => ri.Ingredient)
+      .Include(r => r.RecipeSource)
       .Include(r => r.RecipeCuisines).ThenInclude(rc => rc.Cuisine)
       .Include(r => r.RecipeProteins).ThenInclude(rp => rp.Protein)
       .Include(r => r.RecipeDietaryTags).ThenInclude(rd => rd.DietaryTag)
@@ -226,6 +227,7 @@ public class RecipeService : IRecipeService {
   public async Task<RecipeDto?> GetByIdAsync(int id) {
     Recipe? recipe = await _context.Recipes
       .Include(r => r.Ingredients)
+      .Include(r => r.RecipeSource)
       .Include(r => r.RecipeCuisines).ThenInclude(rc => rc.Cuisine)
       .Include(r => r.RecipeProteins).ThenInclude(rp => rp.Protein)
       .Include(r => r.RecipeDietaryTags).ThenInclude(rd => rd.DietaryTag)
@@ -272,6 +274,7 @@ public class RecipeService : IRecipeService {
       Id = recipe.Id,
       Title = recipe.Title,
       RecipeSourceId = recipe.RecipeSourceId,
+      SourceName = recipe.RecipeSource?.Name ?? string.Empty,
       SourceUrl = recipe.SourceUrl,
       ShortDescription = recipe.ShortDescription,
       ImageUrl = recipe.ImageUrl,

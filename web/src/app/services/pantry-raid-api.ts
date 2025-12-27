@@ -1340,6 +1340,7 @@ export class AdminUnmappedIngredientClient implements IAdminUnmappedIngredientCl
 
 export interface IReferenceClient {
     getSources(): Observable<RecipeSourceDto[]>;
+    getIngredientGroups(): Observable<IngredientGroupDto[]>;
     getIngredients(query?: string | null | undefined): Observable<IngredientDto[]>;
     getCuisines(): Observable<CuisineDto[]>;
     getProteins(): Observable<ProteinDto[]>;
@@ -1383,6 +1384,32 @@ export class ReferenceClient implements IReferenceClient {
         }));
     }
 
+    getIngredientGroups(): Observable<IngredientGroupDto[]> {
+        let url_ = this.baseUrl + "/api/reference/ingredient-groups";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetIngredientGroups(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetIngredientGroups(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<IngredientGroupDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<IngredientGroupDto[]>;
+        }));
+    }
+
     protected processGetSources(response: HttpResponseBase): Observable<RecipeSourceDto[]> {
         const status = response.status;
         const responseBlob =
@@ -1398,6 +1425,35 @@ export class ReferenceClient implements IReferenceClient {
                 result200 = [] as any;
                 for (let item of resultData200)
                     result200!.push(RecipeSourceDto.fromJS(item));
+            }
+            else {
+                result200 = null as any;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    protected processGetIngredientGroups(response: HttpResponseBase): Observable<IngredientGroupDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(IngredientGroupDto.fromJS(item));
             }
             else {
                 result200 = null as any;
@@ -3135,6 +3191,7 @@ export class RecipeDto implements IRecipeDto {
     id?: number;
     title?: string;
     recipeSourceId?: number;
+    sourceName?: string;
     sourceUrl?: string;
     shortDescription?: string | undefined;
     imageUrl?: string | undefined;
@@ -3160,6 +3217,7 @@ export class RecipeDto implements IRecipeDto {
             this.id = _data["id"];
             this.title = _data["title"];
             this.recipeSourceId = _data["recipeSourceId"];
+            this.sourceName = _data["sourceName"];
             this.sourceUrl = _data["sourceUrl"];
             this.shortDescription = _data["shortDescription"];
             this.imageUrl = _data["imageUrl"];
@@ -3201,6 +3259,7 @@ export class RecipeDto implements IRecipeDto {
         data["id"] = this.id;
         data["title"] = this.title;
         data["recipeSourceId"] = this.recipeSourceId;
+        data["sourceName"] = this.sourceName;
         data["sourceUrl"] = this.sourceUrl;
         data["shortDescription"] = this.shortDescription;
         data["imageUrl"] = this.imageUrl;
@@ -3235,6 +3294,7 @@ export interface IRecipeDto {
     id?: number;
     title?: string;
     recipeSourceId?: number;
+    sourceName?: string;
     sourceUrl?: string;
     shortDescription?: string | undefined;
     imageUrl?: string | undefined;

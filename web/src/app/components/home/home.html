@@ -1,1 +1,15 @@
-<p>home works!</p>
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav [mode]="isMobile ? 'over' : 'side'" [opened]="!isMobile" class="sidenav" [fixedInViewport]="isMobile" [fixedTopGap]="64">
+    <app-sidebar></app-sidebar>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <div class="content-header" *ngIf="isMobile">
+        <button mat-icon-button (click)="sidenav.toggle()">
+            <mat-icon>filter_list</mat-icon>
+        </button>
+        <span>Ingredients & Filters</span>
+    </div>
+    <app-results [results]="results"></app-results>
+  </mat-sidenav-content>
+</mat-sidenav-container>

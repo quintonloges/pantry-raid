@@ -1,0 +1,40 @@
+<div class="results-container">
+    <div *ngIf="!hasResults()" class="empty-state">
+        <p>No recipes found. Try adding more ingredients to your pantry or removing filters.</p>
+    </div>
+
+    <ng-container *ngFor="let group of results?.results">
+        <div *ngIf="group.recipes && group.recipes.length > 0" class="result-group">
+            <h2>{{group.missingCount === 0 ? 'You can make these recipes' : group.missingCount + ' Missing Ingredient' + (group.missingCount !== 1 ? 's' : '')}}</h2>
+            
+            <div class="recipe-grid">
+                <mat-card *ngFor="let match of group.recipes" class="recipe-card" (click)="openRecipe(match.recipe?.sourceUrl)">
+                    <img mat-card-image [src]="match.recipe?.imageUrl || 'https://placehold.co/600x400?text=Recipe'" alt="Recipe image" 
+                         onerror="this.src='https://placehold.co/600x400?text=Recipe'">
+                    <mat-card-header>
+                        <mat-card-title>{{match.recipe?.title}}</mat-card-title>
+                        <mat-card-subtitle>{{match.recipe?.sourceName}}</mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <p class="description">{{match.recipe?.shortDescription}}</p>
+                        
+                        <div class="ingredient-preview">
+                            <div class="have-section" *ngIf="match.haveIngredients?.length">
+                                <strong>You have:</strong> {{match.haveIngredients?.join(', ')}}
+                            </div>
+                            <div class="missing-section" *ngIf="match.missingIngredients?.length">
+                                <strong>Missing:</strong> {{match.missingIngredients?.join(', ')}}
+                            </div>
+                            <div class="substitution-section" *ngIf="match.substitutionNotes?.length">
+                                <div *ngFor="let note of match.substitutionNotes" class="note">
+                                    <mat-icon inline>info</mat-icon> {{note}}
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+    </ng-container>
+</div>
+
