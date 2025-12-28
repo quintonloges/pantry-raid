@@ -21,12 +21,14 @@ public class ReferenceTests : IClassFixture<PantryRaidWebApplicationFactory> {
     // Seed data
     using (IServiceScope scope = _factory.Services.CreateScope()) {
       AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-      context.Ingredients.RemoveRange(context.Ingredients); // Clear existing
+      
+      // Use unique slugs to avoid conflicts with other tests
+      string suffix = Guid.NewGuid().ToString().Substring(0, 8);
       
       context.Ingredients.AddRange(
-        new Ingredient { Name = "Banana", Slug = "banana", Aliases = new() },
-        new Ingredient { Name = "Apple", Slug = "apple", Aliases = new() },
-        new Ingredient { Name = "Carrot", Slug = "carrot", Aliases = new() }
+        new Ingredient { Name = "Banana", Slug = $"banana-{suffix}", Aliases = new() },
+        new Ingredient { Name = "Apple", Slug = $"apple-{suffix}", Aliases = new() },
+        new Ingredient { Name = "Carrot", Slug = $"carrot-{suffix}", Aliases = new() }
       );
       await context.SaveChangesAsync();
     }
@@ -53,28 +55,30 @@ public class ReferenceTests : IClassFixture<PantryRaidWebApplicationFactory> {
     HttpClient client = _factory.CreateClient();
 
     // Seed data
+    string suffix = Guid.NewGuid().ToString().Substring(0, 8);
+    string chickenBreast = $"Chicken Breast {suffix}";
+    string chickenThigh = $"Chicken Thigh {suffix}";
+    string beefFlank = $"Beef Flank {suffix}";
+
     using (IServiceScope scope = _factory.Services.CreateScope()) {
       AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-      // We don't clear here to allow parallel execution if needed, just add unique items
       
-      if (!await context.Ingredients.AnyAsync(i => i.Slug == "chicken-breast")) {
-        context.Ingredients.AddRange(
-          new Ingredient { Name = "Chicken Breast", Slug = "chicken-breast", Aliases = new() },
-          new Ingredient { Name = "Chicken Thigh", Slug = "chicken-thigh", Aliases = new() },
-          new Ingredient { Name = "Beef Flank", Slug = "beef-flank", Aliases = new() }
-        );
-        await context.SaveChangesAsync();
-      }
+      context.Ingredients.AddRange(
+        new Ingredient { Name = chickenBreast, Slug = $"chicken-breast-{suffix}", Aliases = new() },
+        new Ingredient { Name = chickenThigh, Slug = $"chicken-thigh-{suffix}", Aliases = new() },
+        new Ingredient { Name = beefFlank, Slug = $"beef-flank-{suffix}", Aliases = new() }
+      );
+      await context.SaveChangesAsync();
     }
 
     // Act
-    List<IngredientDto>? response = await client.GetFromJsonAsync<List<IngredientDto>>("/api/reference/ingredients?query=Chicken");
+    List<IngredientDto>? response = await client.GetFromJsonAsync<List<IngredientDto>>($"/api/reference/ingredients?query=Chicken");
 
     // Assert
     Assert.NotNull(response);
-    Assert.Contains(response, i => i.Name == "Chicken Breast");
-    Assert.Contains(response, i => i.Name == "Chicken Thigh");
-    Assert.DoesNotContain(response, i => i.Name == "Beef Flank");
+    Assert.Contains(response, i => i.Name == chickenBreast);
+    Assert.Contains(response, i => i.Name == chickenThigh);
+    Assert.DoesNotContain(response, i => i.Name == beefFlank);
   }
 
   [Fact]

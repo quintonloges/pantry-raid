@@ -1,3 +1,4 @@
+using Loges.PantryRaid.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Loges.PantryRaid.WebAPI.Controllers.Health;
@@ -6,7 +7,8 @@ namespace Loges.PantryRaid.WebAPI.Controllers.Health;
 [ApiController]
 public class HealthController : ControllerBase {
   [HttpGet]
+  [ProducesResponseType(typeof(HealthResponseDto), 200)]
   public IActionResult Get() {
-    return Ok(new { status = "ok" });
+    return Ok(new HealthResponseDto { Status = "ok" });
   }
 }

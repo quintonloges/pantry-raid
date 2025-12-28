@@ -753,6 +753,69 @@ namespace Loges.PantryRaid.EFCore.Migrations
                     b.ToTable("SystemNotes");
                 });
 
+            modelBuilder.Entity("Loges.PantryRaid.Models.UnmappedIngredient", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("OriginalText")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<int>("RecipeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RecipeSourceId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ResolvedIngredientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<int?>("SuggestedIngredientId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipeId");
+
+                    b.HasIndex("RecipeSourceId");
+
+                    b.HasIndex("ResolvedIngredientId");
+
+                    b.HasIndex("SuggestedIngredientId");
+
+                    b.ToTable("UnmappedIngredients");
+                });
+
             modelBuilder.Entity("Loges.PantryRaid.Models.UserIngredient", b =>
                 {
                     b.Property<string>("UserId")
@@ -1044,6 +1107,39 @@ namespace Loges.PantryRaid.EFCore.Migrations
                     b.Navigation("Ingredient");
 
                     b.Navigation("SubstitutionOption");
+                });
+
+            modelBuilder.Entity("Loges.PantryRaid.Models.UnmappedIngredient", b =>
+                {
+                    b.HasOne("Loges.PantryRaid.Models.Recipe", "Recipe")
+                        .WithMany()
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Loges.PantryRaid.Models.RecipeSource", "RecipeSource")
+                        .WithMany()
+                        .HasForeignKey("RecipeSourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Loges.PantryRaid.Models.Ingredient", "ResolvedIngredient")
+                        .WithMany()
+                        .HasForeignKey("ResolvedIngredientId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Loges.PantryRaid.Models.Ingredient", "SuggestedIngredient")
+                        .WithMany()
+                        .HasForeignKey("SuggestedIngredientId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Recipe");
+
+                    b.Navigation("RecipeSource");
+
+                    b.Navigation("ResolvedIngredient");
+
+                    b.Navigation("SuggestedIngredient");
                 });
 
             modelBuilder.Entity("Loges.PantryRaid.Models.UserIngredient", b =>

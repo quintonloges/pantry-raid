@@ -6,6 +6,7 @@ public class RecipeDto {
   public int Id { get; set; }
   public string Title { get; set; } = string.Empty;
   public int RecipeSourceId { get; set; }
+  public string SourceName { get; set; } = string.Empty;
   public string SourceUrl { get; set; } = string.Empty;
   public string? ShortDescription { get; set; }
   public string? ImageUrl { get; set; }
